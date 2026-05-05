@@ -71,7 +71,7 @@ class AuthController extends Controller
                 'token' => $token
             ]);
 
-            // Mail send (optional)
+            // Mail send 
             try {
                 Mail::send('emails.emailVerificationEmail', ['token' => $token], function($message) use($user){
                     $message->to($user->email);

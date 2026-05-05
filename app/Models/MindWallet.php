@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AccountInfo;
 
-class AddMoney extends Model
+class MindWallet extends Model
 {
     use HasFactory;
-    protected $table ="add_money";
+    protected $table ="mind_wallets";
       protected $guarded =[];
     public function user()
     {
