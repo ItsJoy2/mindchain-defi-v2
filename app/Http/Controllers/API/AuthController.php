@@ -127,6 +127,7 @@ class AuthController extends Controller
     {
         try {
 
+            // Validation
             $validator = Validator::make($request->all(), [
                 'user_name' => 'required|string',
                 'password' => 'required|string'
@@ -140,35 +141,33 @@ class AuthController extends Controller
                 ], 422);
             }
 
+            // User check
             $user = User::where('user_name', $request->user_name)->first();
 
             if (!$user) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'User not found'
+                    'message' => 'No user found with this username'
                 ], 404);
             }
 
-            // Email verification check
+            // Email verify check
             // if (is_null($user->email_verified_at)) {
             //     return response()->json([
             //         'status' => false,
-            //         'message' => 'Please verify your email'
+            //         'message' => 'Email is not verified'
             //     ], 403);
             // }
 
+            // Password check
             if (!Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid credentials'
+                    'message' => 'Username or password is incorrect'
                 ], 401);
             }
 
-            // Update last login
-            $user->update([
-                'last_login' => now()
-            ]);
-
+            // Token
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
@@ -176,15 +175,19 @@ class AuthController extends Controller
                 'message' => 'Login successful',
                 'data' => [
                     'token' => $token,
-                    'user' => $user
+                    'user' => [
+                        'id' => $user->id,
+                        'user_name' => $user->user_name,
+                        'email' => $user->email
+                    ]
                 ]
-            ]);
+            ], 200);
 
         } catch (\Exception $e) {
 
             return response()->json([
                 'status' => false,
-                'message' => 'Login failed',
+                'message' => 'Something went wrong',
                 'error' => $e->getMessage()
             ], 500);
         }
