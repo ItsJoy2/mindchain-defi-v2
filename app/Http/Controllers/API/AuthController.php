@@ -150,12 +150,12 @@ class AuthController extends Controller
             }
 
             // Email verification check
-            if (is_null($user->email_verified_at)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Please verify your email'
-                ], 403);
-            }
+            // if (is_null($user->email_verified_at)) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'Please verify your email'
+            //     ], 403);
+            // }
 
             if (!Hash::check($request->password, $user->password)) {
                 return response()->json([
