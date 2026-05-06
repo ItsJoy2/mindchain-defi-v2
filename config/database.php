@@ -64,6 +64,18 @@ return [
             ]) : [],
         ],
 
+        'old_mysql' => [
+            'driver' => 'mysql',
+            'host' => env('DB_OLD_HOST'),
+            'database' => env('DB_OLD_DATABASE'),
+            'username' => env('DB_OLD_USERNAME'),
+            'password' => env('DB_OLD_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
