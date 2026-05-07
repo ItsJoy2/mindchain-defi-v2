@@ -272,4 +272,67 @@ class AuthController extends Controller
             'message' => 'Logged out successfully'
         ]);
     }
+
+    // PROFILE
+    public function profile(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthenticated user'
+                ], 401);
+            }
+
+            $sponsor = null;
+            if ($user->sponsor) {
+                if (!$user->sponsor->is_admin) {
+                    $sponsor = [
+                        'id' => $user->sponsor->id,
+                        'user_name' => $user->sponsor->user_name,
+                        'email' => $user->sponsor->email,
+                    ];
+                }
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User profile fetched successfully',
+                'data' => [
+                    'id' => $user->id,
+                    'sponsor' => $sponsor,
+                    'user_name' => $user->user_name,
+                    'email' => $user->email,
+                    'referral_code' => $user->referral_code,
+                    'name' => $user->name,
+                    'image' => $user->image,
+                    'date_of_birth' => $user->date_of_birth,
+                    'gender' => $user->gender,
+                    'contact' => $user->contact,
+                    'address' => $user->address,
+                    'city' => $user->city,
+                    'country' => $user->country,
+                    'postal_code' => $user->postal_code,
+                    'nid_passport' => $user->nid_passport,
+                    'status' => $user->status,
+                    'merchant_status' => $user->merchant_status,
+                    'kyc' => $user->kyc,
+                    'consultant' => $user->consultant,
+                    'ambassador' => $user->ambassador,
+                    'elite_club' => $user->elite_club,
+                    'angel_club' => $user->angel_club,
+                    'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified',
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch profile',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -13,27 +13,23 @@ class Transaction extends Model
 
     protected $fillable = [
         'user_id',
-        'receiver_id',
-        'received_from',
         'amount',
         'wallet',
         'type',
         'method',
         'description',
         'txn_id',
+        'kids_username',
+        'confirmation_code',
         'status',
+    ];
+
+    protected $casts = [
+        'amount' => 'decimal:2',
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-    public function receiver()
-    {
-        return $this->belongsTo(User::class, 'receiver_id');
-    }
-    public function sender()
-    {
-        return $this->belongsTo(User::class, 'received_from');
+        return $this->belongsTo(User::class);
     }
 }

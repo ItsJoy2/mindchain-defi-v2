@@ -158,7 +158,7 @@ class MigrationController extends Controller
 DB::connection('old_mysql')
     ->table('bonus_wallets')
     ->orderBy('id')
-    ->chunk(5000, function ($rows) {
+    ->chunk(1000, function ($rows) {
 
         $insertData = [];
 
