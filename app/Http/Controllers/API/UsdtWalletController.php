@@ -66,7 +66,7 @@ class UsdtWalletController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Insufficient Balance'
-                ], 400);
+                ], 402);
             }
 
             DB::beginTransaction();
