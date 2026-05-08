@@ -6,28 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
-
+        Schema::create('usdt_staking_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->decimal('amount', 16, 2);
+            $table->decimal('amount', 16, 8);
+            $table->double('daily_bonus', 8, 2)->default(0);
             $table->enum('wallet', ['USDT', 'MIND', 'MUSD', 'BMIND'])->index();
             $table->enum('type', ['Debit', 'Credit'])->index();
             $table->string('method')->nullable();
             $table->text('description')->nullable();
-            $table->string('txn_id')->unique()->nullable();
-            $table->string('kids_username')->nullable()->index();
-            $table->string('confirmation_code')->nullable();
             $table->enum('status', ['Pending', 'Approved', 'Reject', 'Expired', 'Processing'])->default('Pending')->index();
             $table->timestamps();
-
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('usdt_staking_histories');
     }
 };
