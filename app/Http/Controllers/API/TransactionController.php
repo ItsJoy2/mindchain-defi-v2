@@ -55,7 +55,7 @@ class TransactionController extends Controller
             'message' => 'User transactions fetched successfully',
             'data' => $data,
 
-            // 🔥 simplified pagination
+            // simplified pagination
             'pagination' => [
                 'page' => $paginated->currentPage(),
                 'per_page' => $paginated->perPage(),

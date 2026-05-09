@@ -15,6 +15,8 @@ class UsdtStakingHistory extends Model
         'user_id',
         'amount',
         'daily_bonus',
+        'duration',
+        'received_days',
         'wallet',
         'type',
         'method',
@@ -25,6 +27,8 @@ class UsdtStakingHistory extends Model
     protected $casts = [
         'amount' => 'decimal:8',
         'daily_bonus' => 'float',
+        'duration' => 'integer',
+        'received_days' => 'integer',
         'user_id' => 'integer',
     ];
 

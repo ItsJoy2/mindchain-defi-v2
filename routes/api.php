@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\EliteClubController;
 use App\Http\Controllers\API\TransactionController;
-use App\Http\Controllers\API\UsdtWalletController;
 use App\Http\Controllers\MigrationController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
 
-    Route::post('join-elite-club', [UsdtWalletController::class, 'joinElite']);
+    Route::post('join-elite-club', [EliteClubController::class, 'joinElite']);
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });

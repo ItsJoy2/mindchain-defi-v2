@@ -18,6 +18,8 @@ return new class extends Migration
             $table->double('daily_bonus', 8, 2)->default(0);
             $table->enum('wallet', ['USDT', 'MIND', 'MUSD', 'BMIND'])->index();
             $table->enum('type', ['Debit', 'Credit'])->index();
+            $table->integer('duration')->default(0);
+            $table->integer('received_days')->default(0);
             $table->string('method')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['Pending', 'Approved', 'Reject', 'Expired', 'Processing'])->default('Pending')->index();
