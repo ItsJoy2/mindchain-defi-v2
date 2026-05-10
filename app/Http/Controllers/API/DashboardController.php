@@ -7,6 +7,7 @@ use App\Models\AmbassadorHistory;
 use App\Models\AngelWalletHistory;
 use App\Models\BmindStakingHistory;
 use App\Models\BmindTarget;
+use App\Models\EliteV2StakingHistory;
 use App\Models\MindStakingHistory;
 use App\Models\MusdStakingHistory;
 use App\Models\Transaction;
@@ -51,7 +52,8 @@ public function index()
 
             'angel_wallet' => AngelWalletHistory::where('user_id', $userId)->sum('amount'),
 
-            'elite_Club' => Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')),
+            'elite_club' => Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')),
+            'elite_Club_v2' => number_format(EliteV2StakingHistory::where('user_id', $userId)->sum('amount'), 2),
 
             'mind_kids' => Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount'),
 

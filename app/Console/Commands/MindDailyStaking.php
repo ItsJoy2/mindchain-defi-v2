@@ -11,7 +11,6 @@ use App\Models\User;
 class MindDailyStaking extends Command
 {
     protected $signature = 'mind:staking-daily';
-
     protected $description = 'Mind Daily Staking Cron';
 
     public function handle()
@@ -22,14 +21,21 @@ class MindDailyStaking extends Command
 
             foreach ($purchases as $row) {
 
+                if (!$row || !$row->user_id) {
+                    continue;
+                }
+
                 $user = User::find($row->user_id);
 
                 if (!$user) {
                     continue;
                 }
 
+                $duration = (int) $row->duration;
+                $received = (int) $row->received_days;
+
                 // ACTIVE STAKING
-                if ($row->received_days < $row->duration) {
+                if ($received < $duration) {
 
                     // DAILY BONUS
                     Transaction::create([
@@ -39,12 +45,12 @@ class MindDailyStaking extends Command
                         'method'      => 'Daily Staking Bonus',
                         'type'        => 'Credit',
                         'status'      => 'Approved',
-                        'description' => $row->daily . ' MIND Token Daily Bonus for purchasing Staking Package',
+                        'description' => $row->daily . ' MIND Token Daily Bonus for staking',
                     ]);
 
                     // SPONSOR BONUS
-                    $sponsor = $user->sponsor
-                        ? User::find($user->sponsor)
+                    $sponsor = $user->sponsor_id
+                        ? User::find($user->sponsor_id)
                         : null;
 
                     if ($sponsor && $row->seller_bonus_rate > 0) {
@@ -62,16 +68,15 @@ class MindDailyStaking extends Command
                         ]);
                     }
 
-                    // RECEIVED DAYS UPDATE
+                    // INCREMENT RECEIVED DAYS
                     $row->increment('received_days');
                 }
 
-                // STAKING COMPLETE
+                // SETTLEMENT (EXPIRE)
                 else {
 
                     if ($row->status == 1) {
 
-                        // Ambassador Settlement
                         if ($user->ambassador == 1) {
 
                             AmbassadorHistory::create([
@@ -80,14 +85,11 @@ class MindDailyStaking extends Command
                                 'amount'      => $row->amount,
                                 'method'      => 'Token Settlement',
                                 'type'        => 'Credit',
-                                'status'      => 'Approved',
+                                'status'      => 'approved',
                                 'description' => $row->amount . ' MIND Token settlement bonus for staking',
                             ]);
 
-                        }
-
-                        // Normal User Settlement
-                        else {
+                        } else {
 
                             Transaction::create([
                                 'user_id'     => $user->id,
@@ -100,7 +102,6 @@ class MindDailyStaking extends Command
                             ]);
                         }
 
-                        // CLOSE STAKING
                         $row->update([
                             'status' => 0
                         ]);
@@ -111,7 +112,6 @@ class MindDailyStaking extends Command
             $this->info('Mind staking cron executed successfully.');
 
         } catch (\Exception $e) {
-
             $this->error($e->getMessage());
         }
     }

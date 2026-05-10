@@ -553,4 +553,58 @@ class MindWalletController extends Controller
             ], 500);
         }
     }
+
+    // MIND staking history
+    public function mindStakingHistory(Request $request)
+    {
+        try {
+
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            $perPage = $request->get('per_page', 10);
+
+            $histories = MindPurchaseStake::where('user_id', $user->id)
+                ->latest()
+                ->paginate($perPage);
+
+            $data = $histories->through(function ($row) {
+
+                return [
+                    'id' => $row->id,
+                    'amount' => (float) $row->amount,
+                    'duration' => (int) $row->duration,
+                    'received_days' => (int) $row->received_days,
+                    'daily' => (float) $row->daily,
+                    'status' => $row->status == 1 ? 'Running' : 'Expired',
+                    'created_at' => $row->created_at,
+                ];
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Mind staking history retrieved successfully',
+                'data' => $data->items(),
+
+                'pagination' => [
+                    'page' => $histories->currentPage(),
+                    'per_page' => $histories->perPage(),
+                    'total' => $histories->total(),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

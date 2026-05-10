@@ -19,6 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
 
+    Route::get('affiliates-list', [AuthController::class, 'affiliatesList']);
+
     Route::get('dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
 
     // ELITE CLUB
@@ -30,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('mind-staking', [MindWalletController::class, 'mindStaking']);
     Route::post('mind-staking/store', [MindWalletController::class, 'mindStakingStore']);
     Route::post('mind-staking-marge', [MindWalletController::class, 'mindStakingMarge']);
+    Route::get('mind-staking-history',[MindWalletController::class, 'mindStakingHistory']);
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });

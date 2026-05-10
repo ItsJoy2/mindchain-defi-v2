@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Mail\WelcomeMail;
 use App\Models\User;
 use App\Models\UserVerify;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -43,7 +43,7 @@ class AuthController extends Controller
             $sponsor = null;
 
             if ($request->sponsor) {
-                $sponsor = User::where('user_name', $request->sponsor)->first();
+                $sponsor = User::where('referral_code', $request->sponsor)->first();
 
                 if (!$sponsor) {
                     return response()->json([
@@ -322,6 +322,7 @@ class AuthController extends Controller
                     'consultant' => $user->consultant,
                     'ambassador' => $user->ambassador,
                     'elite_club' => $user->elite_club,
+                    'elite_v2' => $user->is_elite_v2,
                     'angel_club' => $user->angel_club,
                     'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified',
                 ]
@@ -334,5 +335,55 @@ class AuthController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function affiliatesList(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = User::where('sponsor_id', $user->id)
+            ->select(
+                'id',
+                'name',
+                'user_name',
+                'email',
+                'created_at',
+            )
+            ->latest();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('user_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('contact', 'like', "%{$search}%");
+            });
+        }
+
+        $affiliates = $query->paginate($request->per_page ?? 10);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Affiliate list fetched successfully',
+
+            'data' => $affiliates->map(function ($item) {
+                return [
+                    'id'         => $item->id,
+                    'name'       => $item->name,
+                    'user_name'  => $item->user_name,
+                    'email'      => $item->email,
+                    'created_at' => $item->created_at->format('Y-m-d h:i A'),
+                ];
+            }),
+
+            'pagination' => [
+                'current_page' => $affiliates->currentPage(),
+                'per_page'     => $affiliates->perPage(),
+                'total'        => $affiliates->total(),
+            ]
+        ]);
     }
 }
