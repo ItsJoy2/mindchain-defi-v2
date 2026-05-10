@@ -34,6 +34,7 @@ class User extends Authenticatable
         'consultant',
         'ambassador',
         'elite_club',
+        'is_elite_v2',
         'angel_club',
         'last_login'
     ];
@@ -67,5 +68,18 @@ class User extends Authenticatable
     public function referrals()
     {
         return $this->hasMany(User::class, 'sponsor_id');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+    public function usdtStakingHistories()
+    {
+        return $this->hasMany(UsdtStakingHistory::class);
+    }
+    public function eliteStakingHistories()
+    {
+        return $this->hasMany(EliteV2StakingHistory::class);
     }
 }

@@ -33,27 +33,27 @@ public function index()
 
         $wallets = [
 
-            'mind_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'MIND')->whereIn('status', ['Approved', 'Pending'])->where('method', '!=','Kids Program Membership')->sum('amount') . ' MIND',
+            'mind_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'MIND')->whereIn('status', ['Approved', 'Pending'])->where('method', '!=','Kids Program Membership')->sum('amount'),
 
-            'bmind_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'BMIND')->where('status', 'Approved')->sum('amount') . ' BMIND',
+            'bmind_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'BMIND')->where('status', 'Approved')->sum('amount'),
 
-            'musd_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'MUSD')->whereIn('status', ['Approved', 'Pending'])->sum('amount') . ' MUSD',
+            'musd_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'MUSD')->whereIn('status', ['Approved', 'Pending'])->sum('amount'),
 
-            'usdt_wallet' =>Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('status', 'Approved')->sum('amount') . ' USDT',
+            'usdt_wallet' =>Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('status', 'Approved')->sum('amount'),
 
-            'mind_staking' => MindStakingHistory::where('user_id', $userId)->sum('amount') . ' MIND',
+            'mind_staking' => MindStakingHistory::where('user_id', $userId)->sum('amount'),
 
-            'bmind_staking' => BmindStakingHistory::where('user_id', $userId)->sum('amount') . ' BMIND',
+            'bmind_staking' => BmindStakingHistory::where('user_id', $userId)->sum('amount'),
 
             'ambassador_wallet' => AmbassadorHistory::where('user_id', $userId)->sum('amount'),
 
-            'musd_staking' => MusdStakingHistory::where('user_id', $userId)->sum('amount') . ' MUSD',
+            'musd_staking' => MusdStakingHistory::where('user_id', $userId)->sum('amount'),
 
-            'angel_wallet' => AngelWalletHistory::where('user_id', $userId)->sum('amount') . ' MUSD',
+            'angel_wallet' => AngelWalletHistory::where('user_id', $userId)->sum('amount'),
 
             'elite_Club' => Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')),
 
-            'mind_kids' => Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount') . ' MKIDS',
+            'mind_kids' => Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount'),
 
         ];
 

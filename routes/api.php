@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EliteClubController;
+use App\Http\Controllers\API\MindWalletController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\MigrationController;
 use Illuminate\Support\Facades\Route;
@@ -20,7 +21,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
 
+    // ELITE CLUB
+    Route::get('elite-club', [EliteClubController::class, 'index']);
     Route::post('join-elite-club', [EliteClubController::class, 'joinElite']);
+    Route::post('join-elite-v2', [EliteClubController::class, 'joinEliteV2']);
+
+    // MIND STAKING
+    Route::get('mind-staking', [MindWalletController::class, 'mindStaking']);
+    Route::post('mind-staking/store', [MindWalletController::class, 'mindStakingStore']);
+    Route::post('mind-staking-marge', [MindWalletController::class, 'mindStakingMarge']);
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });

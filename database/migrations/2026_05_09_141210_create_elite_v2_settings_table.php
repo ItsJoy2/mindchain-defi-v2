@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('elite_settings', function (Blueprint $table) {
+        Schema::create('elite_v2_settings', function (Blueprint $table) {
 
             $table->id();
+
             $table->integer('mem_fee')->default(0);
             $table->decimal('daily_bonus', 10, 3)->default(0);
-            $table->string('duration', 11)->default('365');
+            $table->string('duration', 11)->default('30');
             $table->double('sponsor_bonus', 8, 2)->default(0);
             $table->integer('lvl1')->default(0);
             $table->integer('lvl2')->default(0);
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('elite_settings');
+        Schema::dropIfExists('elite_v2_settings');
     }
 };
