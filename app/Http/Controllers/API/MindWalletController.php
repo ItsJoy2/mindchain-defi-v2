@@ -94,7 +94,7 @@ class MindWalletController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'duration' => 'required',
+                'duration' => 'required|integer|in:180,365,730,1825',
                 'amount' => 'required|numeric|min:1',
                 'wallet' => 'required|in:mind,ambassador'
             ]);
@@ -140,14 +140,34 @@ class MindWalletController extends Controller
                 ], 400);
             }
 
-            $plan = match ($request->duration) {
+            $duration = (int) $request->duration;
 
-                90 => ['days' => 90, 'apy' => $staking->days_90],
-                180 => ['days' => 180, 'apy' => $staking->days_180],
-                365 => ['days' => 365, 'apy' => $staking->days_365],
-                730 => ['days' => 730, 'apy' => $staking->days_730],
+            $plan = match ($duration) {
 
-                default => ['days' => 1825, 'apy' => $staking->days_1825],
+                // 90 => [
+                //     'days' => 90,
+                //     'apy' => $staking->days_90
+                // ],
+
+                180 => [
+                    'days' => 180,
+                    'apy' => $staking->days_180
+                ],
+
+                365 => [
+                    'days' => 365,
+                    'apy' => $staking->days_365
+                ],
+
+                730 => [
+                    'days' => 730,
+                    'apy' => $staking->days_730
+                ],
+
+                1825 => [
+                    'days' => 1825,
+                    'apy' => $staking->days_1825
+                ],
             };
 
             $days = $plan['days'];
@@ -215,7 +235,7 @@ class MindWalletController extends Controller
             $purchase = MindPurchaseStake::create([
                 'user_id' => $user->id,
                 'amount' => $amount,
-                'duration' => $request->duration,
+                'duration' =>$duration,
                 'received_days' => 0,
                 'apy_value' => round($apy_value, 8),
                 'total_value' => round($total_value, 8),
@@ -330,7 +350,7 @@ class MindWalletController extends Controller
                 'receiver_user_name' => 'required|exists:users,user_name',
                 'amount' => 'required|numeric|min:1',
                 'wallet' => 'required|in:mind,ambassador',
-                'duration' => 'required'
+                'duration' => 'required|integer|in:180,365,730,1825'
             ]);
 
             if ($validator->fails()) {
@@ -392,14 +412,34 @@ class MindWalletController extends Controller
             }
 
             //  PLAN
-            $plan = match ($request->duration) {
+            $duration = (int) $request->duration;
 
-                90 => ['days' => 90, 'apy' => $staking->days_90],
-                180 => ['days' => 180, 'apy' => $staking->days_180],
-                365 => ['days' => 365, 'apy' => $staking->days_365],
-                730 => ['days' => 730, 'apy' => $staking->days_730],
+            $plan = match ($duration) {
 
-                default => ['days' => 1825, 'apy' => $staking->days_1825],
+                // 90 => [
+                //     'days' => 90,
+                //     'apy' => $staking->days_90
+                // ],
+
+                180 => [
+                    'days' => 180,
+                    'apy' => $staking->days_180
+                ],
+
+                365 => [
+                    'days' => 365,
+                    'apy' => $staking->days_365
+                ],
+
+                730 => [
+                    'days' => 730,
+                    'apy' => $staking->days_730
+                ],
+
+                1825 => [
+                    'days' => 1825,
+                    'apy' => $staking->days_1825
+                ],
             };
 
             $days = $plan['days'];
@@ -413,7 +453,7 @@ class MindWalletController extends Controller
             $purchase = MindPurchaseStake::create([
                 'user_id' => $receiver->id,
                 'amount' => $amount,
-                'duration' => $request->duration,
+                'duration' => $duration,
                 'received_days' => 0,
                 'apy_value' => $apy_value,
                 'daily' =>$daily,
