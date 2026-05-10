@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
+use function Laravel\Prompts\number;
+
 class MindWalletController extends Controller
 {
 
@@ -237,9 +239,9 @@ class MindWalletController extends Controller
                 'amount' => $amount,
                 'duration' =>$duration,
                 'received_days' => 0,
-                'apy_value' => round($apy_value, 8),
-                'total_value' => round($total_value, 8),
-                'daily' => round($daily, 8),
+                'apy_value' => $apy_value,
+                'total_value' => number_format($total_value, 5),
+                'daily' => number_format($daily, 5),
                 'seller_bonus_rate' => $staking->seller_bonus,
                 'status' => 1
             ]);
@@ -315,9 +317,8 @@ class MindWalletController extends Controller
                     'duration' => $purchase->duration,
                     'apy' => $apy,
                     'apy_value' => $purchase->apy_value,
-                    'daily' => $purchase->daily,
-                    'total_value' => $purchase->total_value,
-                    'received_days' => $purchase->received_days
+                    'daily' => number_format($purchase->daily, 4),
+                    'total_value' => number_format($purchase->total_value, 4),
                 ]
             ]);
 
@@ -456,9 +457,9 @@ class MindWalletController extends Controller
                 'duration' => $duration,
                 'received_days' => 0,
                 'apy_value' => $apy_value,
-                'daily' =>$daily,
+                'daily' => number_format($daily, 5),
                 'seller_bonus_rate' => $staking->seller_bonus,
-                'total_value' =>$total_value,
+                'total_value' => number_format($total_value, 5),
                 'status' => 1
             ]);
 
@@ -537,8 +538,8 @@ class MindWalletController extends Controller
                     'to' => $receiver->user_name,
                     'amount' => $amount,
                     'apy_value' => $apy_value,
-                    'daily' => $daily,
-                    'total_value' => $total_value
+                    'daily' => number_format($daily, 4),
+                    'total_value' => number_format($total_value, 4)
                 ]
             ]);
 
