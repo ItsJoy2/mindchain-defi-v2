@@ -142,30 +142,12 @@ class MindWalletController extends Controller
 
             $plan = match ($request->duration) {
 
-                '90 Days' => [
-                    'days' => 90,
-                    'apy' => $staking->days_90
-                ],
+                90 => ['days' => 90, 'apy' => $staking->days_90],
+                180 => ['days' => 180, 'apy' => $staking->days_180],
+                365 => ['days' => 365, 'apy' => $staking->days_365],
+                730 => ['days' => 730, 'apy' => $staking->days_730],
 
-                '180 Days' => [
-                    'days' => 180,
-                    'apy' => $staking->days_180
-                ],
-
-                '365 Days' => [
-                    'days' => 365,
-                    'apy' => $staking->days_365
-                ],
-
-                '730 Days' => [
-                    'days' => 730,
-                    'apy' => $staking->days_730
-                ],
-
-                default => [
-                    'days' => 1825,
-                    'apy' => $staking->days_1825
-                ]
+                default => ['days' => 1825, 'apy' => $staking->days_1825],
             };
 
             $days = $plan['days'];
