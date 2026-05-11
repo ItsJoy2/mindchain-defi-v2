@@ -247,10 +247,8 @@ class MindWalletController extends Controller
             ]);
 
             // Affiliate Bonus
-            $sponsor = $user->sponsor
-                ? User::find($user->sponsor)
-                : null;
-
+            $sponsor = $user->sponsor;
+            
             if ($wallet == "mind" && $sponsor) {
 
                 $rate = match ($days) {
