@@ -17,106 +17,176 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-public function index()
-{
-    try {
+    public function index()
+    {
+        try {
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            $userId = $user->id;
+
+            // Static Prices
+            $mind_price  = 0.40;
+            $musd_price  = 0.95;
+            $bmind_price = 0.06;
+            $usdt_price  = 1;
+
+            // Wallet Amounts
+            $mind_wallet = Transaction::where('user_id', $userId)
+                ->where('wallet', 'MIND')
+                ->whereIn('status', ['Approved', 'Pending'])
+                ->where('method', '!=', 'Kids Program Membership')
+                ->sum('amount');
+
+            $bmind_wallet = Transaction::where('user_id', $userId)
+                ->where('wallet', 'BMIND')
+                ->where('status', 'Approved')
+                ->sum('amount');
+
+            $musd_wallet = Transaction::where('user_id', $userId)
+                ->where('wallet', 'MUSD')
+                ->whereIn('status', ['Approved', 'Pending'])
+                ->sum('amount');
+
+            $usdt_wallet = Transaction::where('user_id', $userId)
+                ->where('wallet', 'USDT')
+                ->where('status', 'Approved')
+                ->sum('amount');
+
+            $wallets = [
+
+                'mind_wallet' => [
+                    'balance' => number_format($mind_wallet, 8),
+                    'value'   => number_format($mind_wallet * $mind_price, 2),
+                ],
+
+                'bmind_wallet' => [
+                    'balance' => number_format($bmind_wallet, 8),
+                    'value'   => number_format($bmind_wallet * $bmind_price, 2),
+                ],
+
+                'musd_wallet' => [
+                    'balance' => number_format($musd_wallet, 8),
+                    'value'   => number_format($musd_wallet * $musd_price, 2),
+                ],
+
+                'usdt_wallet' => [
+                    'balance' => number_format($usdt_wallet, 2),
+                    'value'   => number_format($usdt_wallet * $usdt_price, 2),
+                ],
+
+                'mind_staking' => [
+                    'balance' => number_format(MindStakingHistory::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(MindStakingHistory::where('user_id', $userId)->sum('amount') * $mind_price, 2),
+                ],
+
+                'bmind_staking' => [
+                    'balance' => number_format(BmindStakingHistory::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(BmindStakingHistory::where('user_id', $userId)->sum('amount') * $bmind_price, 2),
+                    ],
+
+                'ambassador_wallet' => [
+                    'balance' => number_format(AmbassadorHistory::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(AmbassadorHistory::where('user_id', $userId)->sum('amount') * $mind_price, 2),
+                    ],
+
+                'musd_staking' => [
+                    'balance' => number_format(MusdStakingHistory::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(MusdStakingHistory::where('user_id', $userId)->sum('amount') * $musd_price, 2),
+                ],
+
+                'angel_wallet' => [
+                    'balance' => number_format(AngelWalletHistory::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(AngelWalletHistory::where('user_id', $userId)->sum('amount') * $musd_price, 2),
+                    ],
+
+                'elite_club' => [
+                    'balance' => number_format(Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')), 2),
+                    'value'   => number_format(Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')) * $usdt_price, 2),
+                    ],
+
+                'elite_Club_v2' =>[
+                    'balance' => number_format(EliteV2StakingHistory::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(EliteV2StakingHistory::where('user_id', $userId)->sum('amount') * $musd_price, 2),
+                ],
+
+                'mind_kids' => [
+                    'balance' => number_format(Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount'), 2),
+                    'value'   => number_format(Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount') * $mind_price, 2),
+                ],
+
+            ];
+
+
+            $usdt_history = Transaction::where('user_id', $userId)
+                ->where('wallet', 'USDT')
+                ->latest()
+                ->paginate(10, ['*'], 'usdt_page')
+                ->map(function ($item) {
+
+                    return [
+                        'txn_id'      => $item->txn_id,
+                        'wallet'      => $item->wallet,
+                        'method'      => $item->method,
+                        'type'        => $item->type,
+                        'amount'      => number_format($item->amount, 2),
+                        'status'      => $item->status,
+                        'description' => $item->description,
+                        'date'        => $item->created_at->format('d M Y h:i A'),
+                    ];
+                });
+
+            $musd_history = Transaction::where('user_id', $userId)
+                ->where('wallet', 'MUSD')
+                ->latest()
+                ->paginate(10, ['*'], 'musd_page')
+                ->map(function ($item) {
+
+                    return [
+                        'txn_id'      => $item->txn_id,
+                        'wallet'      => $item->wallet,
+                        'method'      => $item->method,
+                        'type'        => $item->type,
+                        'amount'      => number_format($item->amount, 2),
+                        'status'      => $item->status,
+                        'description' => $item->description,
+                        'date'        => $item->created_at->format('d M Y h:i A'),
+                    ];
+                });
+
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Dashboard data fetched successfully',
+
+                'data' => [
+                    'wallets'      => $wallets,
+                    'prices' => [
+                        'mind_price'  => $mind_price,
+                        'musd_price'  => $musd_price,
+                        'bmind_price' => $bmind_price,
+                        'usdt_price'  => $usdt_price,
+                    ],
+                    'usdt_history' => $usdt_history,
+                    'musd_history' => $musd_history,
+                ]
+
+            ], 200);
+
+        } catch (\Exception $e) {
+
             return response()->json([
                 'status' => false,
-                'message' => 'Unauthorized'
-            ], 401);
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $userId = $user->id;
-
-        $wallets = [
-
-            'mind_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'MIND')->whereIn('status', ['Approved', 'Pending'])->where('method', '!=','Kids Program Membership')->sum('amount'),
-
-            'bmind_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'BMIND')->where('status', 'Approved')->sum('amount'),
-
-            'musd_wallet' => Transaction::where('user_id', $userId)->where('wallet', 'MUSD')->whereIn('status', ['Approved', 'Pending'])->sum('amount'),
-
-            'usdt_wallet' =>Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('status', 'Approved')->sum('amount'),
-
-            'mind_staking' => MindStakingHistory::where('user_id', $userId)->sum('amount'),
-
-            'bmind_staking' => BmindStakingHistory::where('user_id', $userId)->sum('amount'),
-
-            'ambassador_wallet' => AmbassadorHistory::where('user_id', $userId)->sum('amount'),
-
-            'musd_staking' => MusdStakingHistory::where('user_id', $userId)->sum('amount'),
-
-            'angel_wallet' => AngelWalletHistory::where('user_id', $userId)->sum('amount'),
-
-            'elite_club' => Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')),
-            'elite_Club_v2' => number_format(EliteV2StakingHistory::where('user_id', $userId)->sum('amount'), 2),
-
-            'mind_kids' => Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount'),
-
-        ];
-
-
-        $usdt_history = Transaction::where('user_id', $userId)
-            ->where('wallet', 'USDT')
-            ->latest()
-            ->paginate(10, ['*'], 'usdt_page')
-            ->map(function ($item) {
-
-                return [
-                    'txn_id'      => $item->txn_id,
-                    'wallet'      => $item->wallet,
-                    'method'      => $item->method,
-                    'type'        => $item->type,
-                    'amount'      => number_format($item->amount, 8),
-                    'status'      => $item->status,
-                    'description' => $item->description,
-                    'date'        => $item->created_at->format('d M Y h:i A'),
-                ];
-            });
-
-        $musd_history = Transaction::where('user_id', $userId)
-            ->where('wallet', 'MUSD')
-            ->latest()
-            ->paginate(10, ['*'], 'musd_page')
-            ->map(function ($item) {
-
-                return [
-                    'txn_id'      => $item->txn_id,
-                    'wallet'      => $item->wallet,
-                    'method'      => $item->method,
-                    'type'        => $item->type,
-                    'amount'      => number_format($item->amount, 8),
-                    'status'      => $item->status,
-                    'description' => $item->description,
-                    'date'        => $item->created_at->format('d M Y h:i A'),
-                ];
-            });
-
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Dashboard data fetched successfully',
-
-            'data' => [
-                'wallets'      => $wallets,
-                'usdt_history' => $usdt_history,
-                'musd_history' => $musd_history,
-                // 'bmind_target' => $bmindTarget,
-            ]
-
-        ], 200);
-
-    } catch (\Exception $e) {
-
-        return response()->json([
-            'status' => false,
-            'message' => 'Something went wrong',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
 }
