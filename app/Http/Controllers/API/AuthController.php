@@ -62,7 +62,7 @@ class AuthController extends Controller
             $user = User::create([
                 'email' => $request->email,
                 'user_name' => $request->user_name,
-                'password' => $request->password,,
+                'password' => $request->password,
                 'sponsor_id' => $sponsor?->id,
                 'referral_code' => $referralCode,
                 'status' => 1
