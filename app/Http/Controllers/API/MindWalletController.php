@@ -248,7 +248,7 @@ class MindWalletController extends Controller
 
             // Affiliate Bonus
             $sponsor = $user->sponsor;
-            
+
             if ($wallet == "mind" && $sponsor) {
 
                 $rate = match ($days) {
@@ -566,35 +566,43 @@ class MindWalletController extends Controller
                 ], 401);
             }
 
-            $perPage = $request->get('per_page', 10);
+            $perPage = (int) $request->get('per_page', 10);
 
             $histories = MindPurchaseStake::where('user_id', $user->id)
-                ->latest()
+                ->select([
+                    'id',
+                    'amount',
+                    'duration',
+                    'received_days',
+                    'daily',
+                    'status',
+                    'created_at'
+                ])
+                ->orderByDesc('id')
                 ->paginate($perPage);
-
-            $data = $histories->through(function ($row) {
-
-                return [
-                    'id' => $row->id,
-                    'amount' => (float) $row->amount,
-                    'duration' => (int) $row->duration,
-                    'received_days' => (int) $row->received_days,
-                    'daily' => (float) $row->daily,
-                    'status' => $row->status == 1 ? 'Running' : 'Expired',
-                    'created_at' => $row->created_at,
-                ];
-            });
 
             return response()->json([
                 'status' => true,
                 'message' => 'Mind staking history retrieved successfully',
-                'data' => $data->items(),
+                'data' => collect($histories->items())->map(function ($row) {
+
+                    return [
+                        'id' => $row->id,
+                        'amount' => (float) $row->amount,
+                        'duration' => (int) $row->duration,
+                        'received_days' => (int) $row->received_days,
+                        'daily' => (float) $row->daily,
+                        'status' => $row->status == 1 ? 'Running' : 'Expired',
+                        'created_at' => $row->created_at->format('d M Y'),
+                    ];
+                }),
 
                 'pagination' => [
                     'page' => $histories->currentPage(),
                     'per_page' => $histories->perPage(),
                     'total' => $histories->total(),
                 ]
+
             ]);
 
         } catch (\Exception $e) {
