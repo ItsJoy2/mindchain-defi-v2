@@ -1,31 +1,40 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OtpMail;
+use App\Models\Transaction;
+use App\Models\User;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-use App\Models\User;
-use App\Models\Transaction;
-use App\Mail\OtpMail;
-
-use Mail;
-
 class TransferController extends Controller
 {
+
     /*
     |--------------------------------------------------------------------------
-    | Step 1 -> Send OTP
+    | SEND OTP
     |--------------------------------------------------------------------------
     */
 
     public function sendTransferOtp(Request $request)
     {
         try {
+
+            $sender = Auth::user();
+
+            if (!$sender) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
 
             $validator = Validator::make($request->all(), [
                 'user_name' => 'required|exists:users,user_name',
@@ -40,11 +49,15 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            $sender = Auth::user();
-
             $receiver = User::where('user_name', $request->user_name)->first();
 
-            // Self transfer block
+            if (!$receiver) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Receiver not found'
+                ], 404);
+            }
+
             if ($sender->id == $receiver->id) {
                 return response()->json([
                     'status' => false,
@@ -52,32 +65,34 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            // Wallet mapping
-            $walletColumns = [
-                'MIND'  => 'mind_balance',
-                'MUSD'  => 'musd_balance',
-                'USDT'  => 'usdt_balance',
-                'BMIND' => 'bmind_balance',
-            ];
+            $wallet = $request->wallet;
 
-            $walletColumn = $walletColumns[$request->wallet];
+            // BALANCE CHECK
+            $balance = Transaction::where('user_id', $sender->id)
+                ->where('wallet', $wallet)
+                ->sum('amount') ?? 0;
 
-            // Balance check
-            if ($sender->$walletColumn < $request->amount) {
+            if ($balance < $request->amount) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Insufficient balance'
                 ], 422);
             }
 
-            // Generate OTP
+            // OTP
             $otp = rand(100000, 999999);
 
-            // Save pending transaction
-            $transaction = Transaction::create([
+            // DELETE OLD PENDING
+            Transaction::where('user_id', $sender->id)
+                ->where('status', 'Pending')
+                ->where('method', 'User Transfer')
+                ->delete();
+
+            // STORE TEMP TRANSACTION
+            Transaction::create([
                 'user_id'           => $sender->id,
                 'amount'            => $request->amount,
-                'wallet'            => $request->wallet,
+                'wallet'            => $wallet,
                 'type'              => 'Debit',
                 'method'            => 'User Transfer',
                 'description'       => 'Transfer To ' . $receiver->user_name,
@@ -87,13 +102,21 @@ class TransferController extends Controller
                 'status'            => 'Pending',
             ]);
 
-            // Send OTP Mail
-            Mail::to($sender->email)->send(new OtpMail($otp));
+            // SEND MAIL (SAFE)
+            if ($sender->email) {
+                Mail::to($sender->email)->send(
+                    new OtpMail(
+                        $otp,
+                        'Transfer OTP',
+                        'Secure Transfer Verification',
+                        'Use this OTP to complete your transfer'
+                    )
+                );
+            }
 
             return response()->json([
                 'status' => true,
-                'message' => 'OTP sent successfully',
-                'txn_id' => $transaction->txn_id
+                'message' => 'OTP sent successfully'
             ]);
 
         } catch (\Exception $e) {
@@ -107,7 +130,7 @@ class TransferController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Step 2 -> Confirm Transfer
+    | CONFIRM OTP ONLY
     |--------------------------------------------------------------------------
     */
 
@@ -117,9 +140,17 @@ class TransferController extends Controller
 
         try {
 
+            $sender = Auth::user();
+
+            if (!$sender) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
             $validator = Validator::make($request->all(), [
-                'txn_id' => 'required',
-                'otp'    => 'required|numeric'
+                'otp' => 'required|numeric'
             ]);
 
             if ($validator->fails()) {
@@ -129,29 +160,20 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            $sender = Auth::user();
-
-            $transaction = Transaction::where('txn_id', $request->txn_id)
-                ->where('user_id', $sender->id)
+            // FIND BY OTP ONLY
+            $transaction = Transaction::where('user_id', $sender->id)
+                ->where('confirmation_code', $request->otp)
                 ->where('status', 'Pending')
+                ->latest()
                 ->first();
 
             if (!$transaction) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Transaction not found'
-                ], 404);
-            }
-
-            // OTP check
-            if ($transaction->confirmation_code != $request->otp) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid OTP'
                 ], 422);
             }
 
-            // Receiver
             $receiver = User::where('user_name', $transaction->kids_username)->first();
 
             if (!$receiver) {
@@ -161,22 +183,16 @@ class TransferController extends Controller
                 ], 404);
             }
 
-            // Wallet mapping
-            $walletColumns = [
-                'MIND'  => 'mind_balance',
-                'MUSD'  => 'musd_balance',
-                'USDT'  => 'usdt_balance',
-                'BMIND' => 'bmind_balance',
-            ];
+            $wallet = $transaction->wallet;
 
-            $walletColumn = $walletColumns[$transaction->wallet];
+            // RECHECK BALANCE
+            $balance = Transaction::where('user_id', $sender->id)
+                ->where('wallet', $wallet)
+                ->sum('amount') ?? 0;
 
-            // Balance check again
-            if ($sender->$walletColumn < $transaction->amount) {
+            if ($balance < $transaction->amount) {
 
-                $transaction->update([
-                    'status' => 'Reject'
-                ]);
+                $transaction->update(['status' => 'Reject']);
 
                 return response()->json([
                     'status' => false,
@@ -184,31 +200,34 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            // Deduct sender
-            $sender->$walletColumn -= $transaction->amount;
-            $sender->save();
-
-            // Add receiver
-            $receiver->$walletColumn += $transaction->amount;
-            $receiver->save();
-
-            // Update sender transaction
-            $transaction->update([
-                'status' => 'Approved',
-                'confirmation_code' => null
+            // DEBIT SENDER
+            Transaction::create([
+                'user_id'       => $sender->id,
+                'amount'        => $transaction->amount,
+                'wallet'        => $wallet,
+                'type'          => 'Debit',
+                'method'        => 'User Transfer',
+                'description'   => 'Transfer To ' . $receiver->user_name,
+                'txn_id'        => 'TXN' . strtoupper(Str::random(10)),
+                'status'        => 'Approved',
             ]);
 
-            // Receiver transaction
+            // CREDIT RECEIVER
             Transaction::create([
                 'user_id'       => $receiver->id,
                 'amount'        => $transaction->amount,
-                'wallet'        => $transaction->wallet,
+                'wallet'        => $wallet,
                 'type'          => 'Credit',
                 'method'        => 'User Transfer',
                 'description'   => 'Received From ' . $sender->user_name,
                 'txn_id'        => 'TXN' . strtoupper(Str::random(10)),
-                'kids_username' => $sender->user_name,
                 'status'        => 'Approved',
+            ]);
+
+            // CLOSE OTP
+            $transaction->update([
+                'status' => 'Approved',
+                'confirmation_code' => null
             ]);
 
             DB::commit();

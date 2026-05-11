@@ -139,7 +139,7 @@ class DashboardController extends Controller
                         'amount'      => number_format($item->amount, 2),
                         'status'      => $item->status,
                         'description' => $item->description,
-                        'date'        => $item->created_at->format('d M Y h:i A'),
+                        'date'        => $item->created_at->format('d M Y '),
                     ];
                 });
 
@@ -157,7 +157,7 @@ class DashboardController extends Controller
                         'amount'      => number_format($item->amount, 2),
                         'status'      => $item->status,
                         'description' => $item->description,
-                        'date'        => $item->created_at->format('d M Y h:i A'),
+                        'date'        => $item->created_at->format('d M Y'),
                     ];
                 });
 

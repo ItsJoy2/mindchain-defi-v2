@@ -62,7 +62,7 @@ class AuthController extends Controller
             $user = User::create([
                 'email' => $request->email,
                 'user_name' => $request->user_name,
-                'password' => $request->password,
+                'password' => Hash::make($request->password),
                 'sponsor_id' => $sponsor?->id,
                 'referral_code' => $referralCode,
                 'status' => 1
@@ -178,7 +178,8 @@ class AuthController extends Controller
                     'user' => [
                         'id' => $user->id,
                         'user_name' => $user->user_name,
-                        'email' => $user->email
+                        'email' => $user->email,
+                        'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified',
                     ]
                 ]
             ], 200);
@@ -236,29 +237,69 @@ class AuthController extends Controller
             'message' => 'Email verified successfully'
         ]);
     }
-    public function resendVerification($id)
+    public function resendVerification(Request $request)
     {
-        $user = User::find($id);
-        $verify = UserVerify::where('user_id', $id)->first();
+        try {
 
-        if (!$user || !$verify) {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email'
+            ]);
+
+            if ($validator->fails()) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            $verify = UserVerify::where('user_id', $user->id)->first();
+
+            if (!$verify) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Verification token not found'
+                ], 404);
+            }
+
+            Mail::send(
+                'emails.emailVerificationEmail',
+                ['token' => $verify->token],
+                function ($message) use ($user) {
+
+                    $message->to($user->email)
+                        ->subject('Verify Email');
+                }
+            );
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Verification email sent successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            Log::error('Resend verification error: ' . $e->getMessage());
+
             return response()->json([
                 'status' => false,
-                'message' => 'User not found'
-            ], 404);
+                'message' => 'Mail sending failed',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        Mail::send('emails.emailVerificationEmail', ['token' => $verify->token], function ($message) use ($user) {
-            $message->to($user->email);
-            $message->subject('Verify Email');
-        });
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Verification email sent'
-        ]);
     }
-
 
     /**
      * LOGOUT
