@@ -63,17 +63,17 @@ class DashboardController extends Controller
             $wallets = [
 
                 'mind_wallet' => [
-                    'balance' => number_format($mind_wallet, 8),
+                    'balance' => number_format($mind_wallet, 2),
                     'value'   => number_format($mind_wallet * $mind_price, 2),
                 ],
 
                 'bmind_wallet' => [
-                    'balance' => number_format($bmind_wallet, 8),
+                    'balance' => number_format($bmind_wallet, 2),
                     'value'   => number_format($bmind_wallet * $bmind_price, 2),
                 ],
 
                 'musd_wallet' => [
-                    'balance' => number_format($musd_wallet, 8),
+                    'balance' => number_format($musd_wallet, 2),
                     'value'   => number_format($musd_wallet * $musd_price, 2),
                 ],
 
@@ -168,12 +168,12 @@ class DashboardController extends Controller
 
                 'data' => [
                     'wallets'      => $wallets,
-                    'prices' => [
-                        'mind_price'  => $mind_price,
-                        'musd_price'  => $musd_price,
-                        'bmind_price' => $bmind_price,
-                        'usdt_price'  => $usdt_price,
-                    ],
+                    // 'prices' => [
+                    //     'mind_price'  => $mind_price,
+                    //     'musd_price'  => $musd_price,
+                    //     'bmind_price' => $bmind_price,
+                    //     'usdt_price'  => $usdt_price,
+                    // ],
                     'usdt_history' => $usdt_history,
                     'musd_history' => $musd_history,
                 ]
