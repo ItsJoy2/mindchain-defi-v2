@@ -104,7 +104,8 @@ class AuthController extends Controller
                         'id' => $user->id,
                         'user_name' => $user->user_name,
                         'email' => $user->email,
-                        'referral_code' => $user->referral_code
+                        'referral_code' => $user->referral_code,
+                        'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified'
                     ]
                 ]
             ], 201);
