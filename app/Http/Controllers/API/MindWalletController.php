@@ -473,7 +473,7 @@ class MindWalletController extends Controller
             ]);
 
             //  SPONSOR LOGIC
-            $sponsor = $receiver->sponsor ? User::find($receiver->sponsor) : null;
+            $sponsor = $receiver->sponsor;
 
             if ($wallet == "mind" && $sponsor) {
 
