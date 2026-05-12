@@ -261,7 +261,6 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-
                 return response()->json([
                     'status' => false,
                     'message' => 'Validation error',
@@ -272,28 +271,36 @@ class AuthController extends Controller
             $user = User::where('email', $request->email)->first();
 
             if (!$user) {
-
                 return response()->json([
                     'status' => false,
                     'message' => 'User not found'
                 ], 404);
             }
 
-            $verify = UserVerify::where('user_id', $user->id)->first();
-
-            if (!$verify) {
-
+            //If already verified
+            if ($user->email_verified_at) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Verification token not found'
-                ], 404);
+                    'message' => 'Email already verified'
+                ], 400);
             }
 
+            //DELETE OLD TOKEN
+            UserVerify::where('user_id', $user->id)->delete();
+
+            //CREATE NEW TOKEN
+            $token = Str::random(64);
+
+            UserVerify::create([
+                'user_id' => $user->id,
+                'token' => $token
+            ]);
+
+            //SEND EMAIL
             Mail::send(
                 'emails.emailVerificationEmail',
-                ['token' => $verify->token],
+                ['token' => $token],
                 function ($message) use ($user) {
-
                     $message->to($user->email)
                         ->subject('Verify Email');
                 }
