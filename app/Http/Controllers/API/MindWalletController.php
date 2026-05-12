@@ -393,6 +393,7 @@ class MindWalletController extends Controller
                     ->sum('amount');
 
                 if ($balance < $amount) {
+
                     return response()->json([
                         'status' => false,
                         'message' => 'Insufficient MIND balance'
@@ -403,10 +404,33 @@ class MindWalletController extends Controller
                     'user_id' => $user->id,
                     'wallet' => 'MIND',
                     'amount' => -$amount,
-                    'method' => 'MIND Staking Marge Sent',
+                    'method' => 'Marge Staking Sent',
                     'type' => 'Debit',
                     'status' => 'Approved',
-                    'description' => "Marge MIND staking to {$receiver->user_name}"
+                    'description' => "MIND staking sent to {$receiver->user_name}"
+                ]);
+
+            } else {
+
+                $balance = AmbassadorHistory::where('user_id', $user->id)
+                    ->sum('amount');
+
+                if ($balance < $amount) {
+
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Insufficient Ambassador balance'
+                    ], 400);
+                }
+
+                AmbassadorHistory::create([
+                    'user_id' => $user->id,
+                    'wallet' => 'AMBASSADOR',
+                    'amount' => -$amount,
+                    'method' => 'Marge Staking Sent',
+                    'type' => 'Debit',
+                    'status' => 'Approved',
+                    'description' => "Ambassador staking sent to {$receiver->user_name}"
                 ]);
             }
 
