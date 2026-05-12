@@ -5,8 +5,7 @@ use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EliteClubController;
 use App\Http\Controllers\API\MindWalletController;
 use App\Http\Controllers\API\TransactionController;
-use App\Http\Controllers\Api\TransferController;
-use App\Http\Controllers\MigrationController;
+use App\Http\Controllers\API\TransferController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -42,5 +41,3 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-
-Route::get('migrate-test-users-to-users', [MigrationController::class, 'migrateTestUsersToUsers']);

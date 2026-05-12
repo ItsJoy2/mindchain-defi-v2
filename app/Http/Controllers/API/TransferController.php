@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\OtpMail;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\WalletService;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,12 +17,13 @@ use Illuminate\Support\Str;
 
 class TransferController extends Controller
 {
+    protected $walletService;
 
-    /*
-    |--------------------------------------------------------------------------
-    | SEND OTP
-    |--------------------------------------------------------------------------
-    */
+    public function __construct(WalletService $walletService)
+    {
+        $this->walletService = $walletService;
+    }
+
 
     public function sendTransferOtp(Request $request)
     {
@@ -38,8 +40,8 @@ class TransferController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'user_name' => 'required|exists:users,user_name',
-                'wallet'    => 'required|in:MIND,MUSD,USDT,BMIND',
-                'amount'    => 'required|numeric|min:0.01',
+                'wallet'  => 'required|in:MIND,MUSD,USDT,BMIND',
+                'amount'  => 'required|numeric|min:0.01',
             ]);
 
             if ($validator->fails()) {
@@ -65,51 +67,42 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            $wallet = $request->wallet;
+            if (!$this->walletService->hasBalance($sender->id, $request->wallet, $request->amount)) {
 
-            // BALANCE CHECK
-            $balance = Transaction::where('user_id', $sender->id)
-                ->where('wallet', $wallet)
-                ->sum('amount') ?? 0;
-
-            if ($balance < $request->amount) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Insufficient balance'
                 ], 422);
             }
 
-            // OTP
             $otp = rand(100000, 999999);
 
-            // DELETE OLD PENDING
+            // remove old pending
             Transaction::where('user_id', $sender->id)
-                ->where('status', 'Pending')
                 ->where('method', 'User Transfer')
+                ->where('status', 'Pending')
                 ->delete();
 
-            // STORE TEMP TRANSACTION
             Transaction::create([
                 'user_id'           => $sender->id,
-                'amount'            => $request->amount,
-                'wallet'            => $wallet,
+                'receiver_id'       => $receiver->id,
+                'amount'            => -$request->amount,
+                'wallet'            => $request->wallet,
                 'type'              => 'Debit',
                 'method'            => 'User Transfer',
-                'description'       => 'Transfer To ' . $receiver->user_name,
-                'txn_id'            => 'TXN' . strtoupper(Str::random(10)),
-                'kids_username'     => $receiver->user_name,
+                'description'       =>  -$request->amount . ' ' . $request->wallet . ' Transfer To ' . $receiver->user_name,
+                'txn_id'            => strtoupper(Str::random(10)),
                 'confirmation_code' => $otp,
                 'status'            => 'Pending',
             ]);
 
-            // SEND MAIL (SAFE)
             if ($sender->email) {
                 Mail::to($sender->email)->send(
                     new OtpMail(
                         $otp,
                         'Transfer OTP',
-                        'Secure Transfer Verification',
-                        'Use this OTP to complete your transfer'
+                        'Secure Wallet Transfer',
+                        'Use this OTP to confirm your transfer'
                     )
                 );
             }
@@ -127,12 +120,6 @@ class TransferController extends Controller
             ], 500);
         }
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONFIRM OTP ONLY
-    |--------------------------------------------------------------------------
-    */
 
     public function confirmTransfer(Request $request)
     {
@@ -160,7 +147,6 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            // FIND BY OTP ONLY
             $transaction = Transaction::where('user_id', $sender->id)
                 ->where('confirmation_code', $request->otp)
                 ->where('status', 'Pending')
@@ -174,7 +160,7 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            $receiver = User::where('user_name', $transaction->kids_username)->first();
+            $receiver = User::find($transaction->receiver_id);
 
             if (!$receiver) {
                 return response()->json([
@@ -184,13 +170,9 @@ class TransferController extends Controller
             }
 
             $wallet = $transaction->wallet;
+            $amount = abs($transaction->amount);
 
-            // RECHECK BALANCE
-            $balance = Transaction::where('user_id', $sender->id)
-                ->where('wallet', $wallet)
-                ->sum('amount') ?? 0;
-
-            if ($balance < $transaction->amount) {
+            if (!$this->walletService->hasBalance($sender->id, $wallet, $amount)) {
 
                 $transaction->update(['status' => 'Reject']);
 
@@ -200,31 +182,18 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            // DEBIT SENDER
-            Transaction::create([
-                'user_id'       => $sender->id,
-                'amount'        => $transaction->amount,
-                'wallet'        => $wallet,
-                'type'          => 'Debit',
-                'method'        => 'User Transfer',
-                'description'   => 'Transfer To ' . $receiver->user_name,
-                'txn_id'        => 'TXN' . strtoupper(Str::random(10)),
-                'status'        => 'Approved',
-            ]);
-
             // CREDIT RECEIVER
             Transaction::create([
                 'user_id'       => $receiver->id,
-                'amount'        => $transaction->amount,
+                'amount'        => $amount,
                 'wallet'        => $wallet,
                 'type'          => 'Credit',
                 'method'        => 'User Transfer',
-                'description'   => 'Received From ' . $sender->user_name,
-                'txn_id'        => 'TXN' . strtoupper(Str::random(10)),
+                'description'   => $amount . ' ' . $wallet . ' Received From ' . $sender->user_name,
+                'txn_id'        => strtoupper(Str::random(10)),
                 'status'        => 'Approved',
             ]);
 
-            // CLOSE OTP
             $transaction->update([
                 'status' => 'Approved',
                 'confirmation_code' => null
