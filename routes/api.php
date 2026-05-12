@@ -11,8 +11,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('register', [AuthController::class, 'register'])->name('register');
+
 Route::get('verify-email/{token}', [AuthController::class, 'verifyEmail']);
 Route::post('resend-verification', [AuthController::class, 'resendVerification']);
+
+Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
 Route::post('account/verify', [AuthController::class, 'verifyEmail']);
 
@@ -20,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('change-password', [AuthController::class, 'changePassword']);
 
     Route::get('affiliates-list', [AuthController::class, 'affiliatesList']);
 

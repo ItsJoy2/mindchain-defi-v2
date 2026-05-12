@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\WelcomeMail;
 use App\Models\User;
 use App\Models\UserVerify;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -80,9 +81,20 @@ class AuthController extends Controller
 
             if ($user->email) {
                 try {
-                    Mail::send('emails.emailVerificationEmail', ['token' => $token], function ($message) use ($user) {
-                        $message->to($user->email);
-                        $message->subject('Verify Email');
+                    Mail::send('emails.emailVerification', [
+                        'title' => 'Email Verification',
+                        'subHeader' => 'Verify your email address',
+                        'heading' => 'Email Verification',
+                        'messageText' => "Welcome to Mindchain Ecosystem! To activate your account, please verify your email address by clicking the button below.",
+
+                        'buttonText' => 'Verify Email',
+                        'buttonUrl' => url('/verify-email?token=' . $token . '&email=' . $user->email),
+                        'buttonColor' => '#10b981',
+
+                        'extraText' => "This verification link is valid for a limited time. If you did not create this account, you can ignore this email safely."
+                    ], function ($message) use ($user) {
+                        $message->to($user->email)
+                            ->subject('Verify Your Email');
                     });
 
                     Mail::to($user->email)->send(new WelcomeMail($user));
@@ -300,14 +312,21 @@ class AuthController extends Controller
             ]);
 
             //SEND EMAIL
-            Mail::send(
-                'emails.emailVerificationEmail',
-                ['token' => $token],
-                function ($message) use ($user) {
-                    $message->to($user->email)
-                        ->subject('Verify Email');
-                }
-            );
+            Mail::send('emails.emailVerification', [
+                'title' => 'Email Verification',
+                'subHeader' => 'Verify your email address',
+                'heading' => 'Email Verification',
+                'messageText' => "Welcome to Mindchain Ecosystem! To activate your account, please verify your email address by clicking the button below.",
+
+                'buttonText' => 'Verify Email',
+                'buttonUrl' => url('/verify-email?token=' . $token . '&email=' . $user->email),
+                'buttonColor' => '#10b981',
+
+                'extraText' => "This verification link is valid for a limited time. If you did not create this account, you can ignore this email safely."
+            ], function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Verify Your Email');
+            });
 
             return response()->json([
                 'status' => true,
@@ -451,5 +470,202 @@ class AuthController extends Controller
                 'total'        => $affiliates->total(),
             ]
         ]);
+    }
+
+
+        public function forgotPassword(Request $request)
+    {
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email|exists:users,email'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $user = User::where('email', $request->email)->first();
+
+            // Generate Token
+            $token = Str::random(64);
+
+            // Delete old token
+            DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->delete();
+
+            // Insert new token
+            DB::table('password_reset_tokens')->insert([
+                'email' => $request->email,
+                'token' => Hash::make($token),
+                'created_at' => Carbon::now()
+            ]);
+
+            // Reset Link
+            $resetLink = url('/reset-password?token=' . $token . '&email=' . $request->email);
+
+            // Send Mail
+            Mail::send('emails.resetMailVerification', [
+                'title' => 'Secure Password Reset',
+                'subHeader' => 'Security Notification',
+                'heading' => 'Reset Your Password',
+                'messageText' => "We received a request to reset the password for your account. If you made this request, you can securely create a new password by clicking the button below.",
+
+                'buttonText' => 'Reset Password',
+                'buttonUrl' => $resetLink,
+                'buttonColor' => '#4f46e5',
+
+                'extraText' => "This link will expire in 20 minutes for your security. If you did not request a password reset, you can safely ignore this email. No changes have been made to your account."
+            ], function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Reset Your Password');
+            });
+            return response()->json([
+                'status' => true,
+                'message' => 'Password reset link sent to email'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reset Password
+     */
+    public function resetPassword(Request $request)
+    {
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
+                'token' => 'required',
+                'password' => 'required|min:8|confirmed'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $reset = DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->first();
+
+            if (!$reset) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid reset request'
+                ], 400);
+            }
+
+            // Check Token
+            if (!Hash::check($request->token, $reset->token)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid token'
+                ], 400);
+            }
+
+            // Check Expiry
+            if (Carbon::parse($reset->created_at)->addMinutes(20)->isPast()) {
+
+                DB::table('password_reset_tokens')
+                    ->where('email', $request->email)
+                    ->delete();
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Token expired'
+                ], 400);
+            }
+
+            // Update Password
+            User::where('email', $request->email)->update([
+                'password' => $request->password
+            ]);
+
+            // Delete Token
+            DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Password reset successful'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Change Password (Logged In User)
+     */
+    public function changePassword(Request $request)
+    {
+        try {
+
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required',
+                'new_password' => 'required|min:8|confirmed'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            // Check Current Password
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Current password is incorrect'
+                ], 400);
+            }
+
+            // Update Password
+            $user->update([
+                'password' => $request->new_password
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Password changed successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

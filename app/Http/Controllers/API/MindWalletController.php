@@ -389,7 +389,7 @@ class MindWalletController extends Controller
                 $balance = Transaction::where('user_id', $user->id)
                     ->where('wallet', 'MIND')
                     ->whereIn('status', ['Approved', 'Pending'])
-                    ->where('method', '!=', ['Kids Program Membership', 'MIND Marge Staking Received'])
+                    ->whereNotIn('method', ['Kids Program Membership', 'MIND Marge Staking Received'])
                     ->sum('amount');
 
                 if ($balance < $amount) {
