@@ -14,6 +14,8 @@ Route::post('register', [AuthController::class, 'register'])->name('register');
 Route::get('verify-email/{token}', [AuthController::class, 'verifyEmail']);
 Route::post('resend-verification', [AuthController::class, 'resendVerification']);
 
+Route::post('account/verify', [AuthController::class, 'verifyEmail']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('profile', [AuthController::class, 'profile']);

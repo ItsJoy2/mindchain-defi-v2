@@ -93,13 +93,13 @@ class AuthController extends Controller
             }
 
             // Token create
-            $authToken = $user->createToken('auth_token')->plainTextToken;
+            // $authToken = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'status' => true,
                 'message' => 'Registered successfully. Please verify email.',
                 'data' => [
-                    'token' => $authToken,
+                    // 'token' => $authToken,
                     'user' => [
                         'id' => $user->id,
                         'user_name' => $user->user_name,
@@ -203,9 +203,13 @@ class AuthController extends Controller
     /**
      * EMAIL VERIFICATION RESEND
      */
-    public function verifyEmail($token)
+    public function verifyEmail(Request $request)
     {
-        $verify = UserVerify::where('token', $token)->first();
+        $request->validate([
+            'token' => 'required'
+        ]);
+
+        $verify = UserVerify::where('token', $request->token)->first();
 
         if (!$verify) {
             return response()->json([
@@ -223,26 +227,31 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Already verified check
-        if ($user->email_verified_at) {
-            return response()->json([
-                'status' => true,
-                'message' => 'Email already verified'
+        if (!$user->email_verified_at) {
+            $user->update([
+                'email_verified_at' => now()
             ]);
         }
 
-        $user->update([
-            'email_verified_at' => now()
-        ]);
-
-        // delete token
         $verify->delete();
+
+        $authToken = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'status' => true,
-            'message' => 'Email verified successfully'
+            'message' => 'Email verified successfully',
+            'data' => [
+                'token' => $authToken,
+                'user' => [
+                    'user_name' => $user->user_name,
+                    'email' => $user->email,
+                    'email_verified' => 'Verified'
+                ]
+            ]
         ]);
     }
+
+    // RESEND VERIFICATION EMAIL
     public function resendVerification(Request $request)
     {
         try {

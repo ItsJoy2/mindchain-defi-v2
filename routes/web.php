@@ -7,4 +7,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('account/verify/{token}', [AuthController::class, 'verifyEmail'])->name('user.verify');
+// Route::get('account/verify/{token}', [AuthController::class, 'verifyEmail'])->name('user.verify');
