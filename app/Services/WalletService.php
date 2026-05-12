@@ -18,10 +18,7 @@ class WalletService
 
             return $query
                 ->whereIn('status', ['Approved', 'Pending'])
-                ->whereNotIn('method', [
-                    'Kids Program Membership',
-                    'MIND Marge Staking Received'
-                ])
+                ->whereNotIn('method', ['Kids Program Membership', 'MIND Marge Staking Received'])
                 ->sum('amount');
         }
 

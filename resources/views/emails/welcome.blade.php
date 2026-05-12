@@ -47,7 +47,7 @@
     .title {
       font-size: 22px;
       font-weight: 700;
-      color: #ff5850;
+      color: #ffa601;
       margin-bottom: 10px;
     }
 
@@ -74,6 +74,7 @@
     .btn {
       display: inline-block;
       margin-top: 20px;
+      margin:auto;
       padding: 12px 25px;
       background: #01379c;
       color: #fff;

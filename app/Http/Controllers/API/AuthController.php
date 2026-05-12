@@ -88,7 +88,7 @@ class AuthController extends Controller
                         'messageText' => "Welcome to Mindchain Ecosystem! To activate your account, please verify your email address by clicking the button below.",
 
                         'buttonText' => 'Verify Email',
-                        'buttonUrl' => url('/verify-email?token=' . $token . '&email=' . $user->email),
+                        'buttonUrl' => 'https:://mindchainwallet.com/auth/verify-user?token=' . $token,
                         'buttonColor' => '#10b981',
 
                         'extraText' => "This verification link is valid for a limited time. If you did not create this account, you can ignore this email safely."
@@ -319,7 +319,7 @@ class AuthController extends Controller
                 'messageText' => "Welcome to Mindchain Ecosystem! To activate your account, please verify your email address by clicking the button below.",
 
                 'buttonText' => 'Verify Email',
-                'buttonUrl' => url('/verify-email?token=' . $token . '&email=' . $user->email),
+                'buttonUrl' => 'https:://mindchainwallet.com/auth/verify-user?token=' . $token,
                 'buttonColor' => '#10b981',
 
                 'extraText' => "This verification link is valid for a limited time. If you did not create this account, you can ignore this email safely."
