@@ -404,7 +404,7 @@ class MindWalletController extends Controller
                     'user_id' => $user->id,
                     'wallet' => 'MIND',
                     'amount' => -$amount,
-                    'method' => 'Marge Staking Sent',
+                    'method' => 'MIND Marge Staking Sent',
                     'type' => 'Debit',
                     'status' => 'Approved',
                     'description' => "MIND staking sent to {$receiver->user_name}"
@@ -425,9 +425,9 @@ class MindWalletController extends Controller
 
                 AmbassadorHistory::create([
                     'user_id' => $user->id,
-                    'wallet' => 'AMBASSADOR',
+                    'wallet' => 'MIND',
                     'amount' => -$amount,
-                    'method' => 'Marge Staking Sent',
+                    'method' => 'MIND Marge Staking Sent',
                     'type' => 'Debit',
                     'status' => 'Approved',
                     'description' => "Ambassador staking sent to {$receiver->user_name}"
@@ -490,7 +490,7 @@ class MindWalletController extends Controller
                 'user_id' => $receiver->id,
                 'wallet' => 'MIND',
                 'amount' => 0,
-                'method' => 'Marge Staking Received',
+                'method' => 'MIND Marge Staking Received',
                 'type' => 'Credit',
                 'status' => 'Approved',
                 'description' => "Received MIND staking from {$user->user_name}"
