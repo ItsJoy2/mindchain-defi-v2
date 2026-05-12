@@ -42,7 +42,7 @@ class DashboardController extends Controller
             $mind_wallet = Transaction::where('user_id', $userId)
                 ->where('wallet', 'MIND')
                 ->whereIn('status', ['Approved', 'Pending'])
-                ->where('method', '!=', ['Kids Program Membership', 'MIND Marge Staking Received'])
+                ->whereNotIn('method', ['Kids Program Membership', 'MIND Marge Staking Received'])
                 ->sum('amount');
 
             $bmind_wallet = Transaction::where('user_id', $userId)
