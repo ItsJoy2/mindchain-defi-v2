@@ -156,7 +156,10 @@ class AuthController extends Controller
             if (is_null($user->email_verified_at)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Email is not verified'
+                    'message' => 'Email is not verified',
+                    'user' => [
+                        'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified',
+                    ]
                 ], 403);
             }
 
