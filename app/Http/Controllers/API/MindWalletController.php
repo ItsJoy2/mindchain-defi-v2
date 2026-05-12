@@ -188,7 +188,7 @@ class MindWalletController extends Controller
                 $balance = Transaction::where('user_id', $user->id)
                     ->where('wallet', 'MIND')
                     ->whereIn('status', ['Approved', 'Pending'])
-                    ->where('method', '!=', 'Kids Program Membership')
+                    ->where('method', '!=', ['Kids Program Membership', 'MIND Marge Staking Received'])
                     ->sum('amount');
 
                 if ($balance < $amount) {
@@ -389,7 +389,7 @@ class MindWalletController extends Controller
                 $balance = Transaction::where('user_id', $user->id)
                     ->where('wallet', 'MIND')
                     ->whereIn('status', ['Approved', 'Pending'])
-                    ->where('method', '!=', 'Kids Program Membership')
+                    ->where('method', '!=', ['Kids Program Membership', 'MIND Marge Staking Received'])
                     ->sum('amount');
 
                 if ($balance < $amount) {
@@ -489,7 +489,7 @@ class MindWalletController extends Controller
             Transaction::create([
                 'user_id' => $receiver->id,
                 'wallet' => 'MIND',
-                'amount' => 0,
+                'amount' => $amount,
                 'method' => 'MIND Marge Staking Received',
                 'type' => 'Credit',
                 'status' => 'Approved',
