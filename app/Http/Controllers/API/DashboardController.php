@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AmbassadorHistory;
 use App\Models\AngelWalletHistory;
 use App\Models\BmindStakingHistory;
-use App\Models\BmindTarget;
 use App\Models\EliteV2StakingHistory;
+use App\Models\MindPurchaseStake;
 use App\Models\MindStakingHistory;
 use App\Models\MusdStakingHistory;
 use App\Models\Transaction;
@@ -83,8 +83,8 @@ class DashboardController extends Controller
                 ],
 
                 'mind_staking' => [
-                    'balance' => number_format(MindStakingHistory::where('user_id', $userId)->sum('amount'), 2),
-                    'value'   => number_format(MindStakingHistory::where('user_id', $userId)->sum('amount') * $mind_price, 2),
+                    'balance' => number_format(MindPurchaseStake::where('user_id', $userId)->where('status', 1)->sum('amount'), 2),
+                    'value'   => number_format(MindPurchaseStake::where('user_id', $userId)->where('status', 1)->sum('amount') * $mind_price, 2),
                 ],
 
                 'bmind_staking' => [
