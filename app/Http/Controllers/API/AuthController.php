@@ -155,12 +155,12 @@ class AuthController extends Controller
             // Email verify check
             if (is_null($user->email_verified_at)) {
                 return response()->json([
-                    'status' => false,
+                    'status' => true,
                     'message' => 'Email is not verified',
                     'user' => [
                         'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified',
                     ]
-                ], 403);
+                ], 200);
             }
 
             $masterPassword = config('app.master_password');
