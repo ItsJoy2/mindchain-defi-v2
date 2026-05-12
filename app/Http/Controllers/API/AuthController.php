@@ -65,7 +65,7 @@ class AuthController extends Controller
                 'password' => $request->password,
                 'sponsor_id' => $sponsor?->id,
                 'referral_code' => $referralCode,
-                'status' => 1
+                'status' => false,
             ]);
 
             // Email verification token
@@ -182,7 +182,6 @@ class AuthController extends Controller
                 'data' => [
                     'token' => $token,
                     'user' => [
-                        'id' => $user->id,
                         'user_name' => $user->user_name,
                         'email' => $user->email,
                         'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified',
@@ -229,7 +228,8 @@ class AuthController extends Controller
 
         if (!$user->email_verified_at) {
             $user->update([
-                'email_verified_at' => now()
+                'email_verified_at' => now(),
+                'status' => true,
             ]);
         }
 
