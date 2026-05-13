@@ -9,13 +9,13 @@ class OtpValidation extends Command
 {
     protected $signature = 'otp:expire';
 
-    protected $description = 'Expire pending OTP transactions after 10 minutes';
+    protected $description = 'Expire pending OTP transactions after 7 minutes';
 
     public function handle()
     {
         Transaction::where('method', 'User Transfer')
             ->where('status', 'Pending')
-            ->where('updated_at', '<=', now()->subMinutes(10))
+            ->where('updated_at', '<=', now()->subMinutes(7))
             ->update([
                 'status' => 'Expired',
                 'confirmation_code' => null
@@ -23,4 +23,5 @@ class OtpValidation extends Command
 
         $this->info('Expired transfer transactions updated successfully.');
     }
+    
 }
