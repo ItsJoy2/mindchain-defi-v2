@@ -11,18 +11,17 @@ class OtpMail extends Mailable
     use Queueable, SerializesModels;
 
     public $otp;
+    public $userName;
     public $title;
     public $subtitle;
     public $messageText;
 
-    public function __construct($otp, $title = null, $subtitle = null, $messageText = null)
+    public function __construct($otp, $userName = null, $title = null, $subtitle = null, $messageText = null)
     {
         $this->otp = $otp;
-
+        $this->userName = $userName ?? 'User';
         $this->title = $title ?? 'OTP Verification';
-
         $this->subtitle = $subtitle ?? 'Secure verification process';
-
         $this->messageText = $messageText
             ?? 'Use the verification code below to continue securely.';
     }
@@ -30,6 +29,6 @@ class OtpMail extends Mailable
     public function build()
     {
         return $this->subject($this->title)
-                    ->view('emails.otpVerification');
+            ->view('emails.otpVerification');
     }
 }

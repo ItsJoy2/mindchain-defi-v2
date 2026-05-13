@@ -58,7 +58,7 @@
                                     color:#111827;
                                     font-size:24px;
                                 ">
-                                Hello 👋
+                                Hello {{ $userName ?? 'User' }},
                             </h2>
 
                             <p style="
@@ -98,7 +98,7 @@
                                     line-height:28px;
                                     color:#6b7280;
                                 ">
-                                This OTP is valid for a 15 minute period and can only be used once.
+                                This OTP is valid for a 5 minute period and can only be used once.
                             </p>
 
                             <p style="

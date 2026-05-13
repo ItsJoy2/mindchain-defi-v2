@@ -93,6 +93,7 @@ class TransferController extends Controller
                 Mail::to($sender->email)->send(
                     new OtpMail(
                         $otp,
+                        $sender->user_name,
                         'Transfer OTP',
                         'Secure Wallet Transfer',
                         'Use this OTP to confirm your transfer'
@@ -271,6 +272,7 @@ class TransferController extends Controller
                 Mail::to($sender->email)->send(
                     new OtpMail(
                         $otp,
+                        $sender->user_name,
                         'Resend Transfer OTP',
                         'Secure Wallet Transfer',
                         'Use this OTP to confirm your wallet transfer'
