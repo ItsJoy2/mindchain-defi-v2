@@ -547,7 +547,6 @@ class AuthController extends Controller
         try {
 
             $validator = Validator::make($request->all(), [
-                'email' => 'required|email',
                 'token' => 'required',
                 'password' => 'required|min:8|confirmed'
             ]);
@@ -559,30 +558,30 @@ class AuthController extends Controller
                 ], 422);
             }
 
-            $reset = DB::table('password_reset_tokens')
-                ->where('email', $request->email)
-                ->first();
+            // Find all reset records
+            $reset = DB::table('password_reset_tokens')->get();
 
-            if (!$reset) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Invalid reset request'
-                ], 400);
+            $matched = null;
+
+            foreach ($reset as $row) {
+                if (Hash::check($request->token, $row->token)) {
+                    $matched = $row;
+                    break;
+                }
             }
 
-            // Check Token
-            if (!Hash::check($request->token, $reset->token)) {
+            if (!$matched) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid token'
                 ], 400);
             }
 
-            // Check Expiry
-            if (Carbon::parse($reset->created_at)->addMinutes(20)->isPast()) {
+            // Check expiry
+            if (Carbon::parse($matched->created_at)->addMinutes(20)->isPast()) {
 
                 DB::table('password_reset_tokens')
-                    ->where('email', $request->email)
+                    ->where('email', $matched->email)
                     ->delete();
 
                 return response()->json([
@@ -591,14 +590,14 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            // Update Password
-            User::where('email', $request->email)->update([
+            // Update password (AUTO EMAIL FOUND)
+            User::where('email', $matched->email)->update([
                 'password' => $request->password
             ]);
 
-            // Delete Token
+            // delete token
             DB::table('password_reset_tokens')
-                ->where('email', $request->email)
+                ->where('email', $matched->email)
                 ->delete();
 
             return response()->json([
