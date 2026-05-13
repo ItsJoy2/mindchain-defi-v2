@@ -47,7 +47,7 @@ class DashboardController extends Controller
 
             $bmind_wallet = Transaction::where('user_id', $userId)
                 ->where('wallet', 'BMIND')
-                ->where('status', 'Approved')
+                ->whereIn('status', ['Approved', 'Pending'])
                 ->sum('amount');
 
             $musd_wallet = Transaction::where('user_id', $userId)
@@ -57,7 +57,7 @@ class DashboardController extends Controller
 
             $usdt_wallet = Transaction::where('user_id', $userId)
                 ->where('wallet', 'USDT')
-                ->where('status', 'Approved')
+                ->whereIn('status', ['Approved', 'Pending'])
                 ->sum('amount');
 
             $wallets = [
