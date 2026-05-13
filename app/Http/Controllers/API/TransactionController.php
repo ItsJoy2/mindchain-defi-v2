@@ -23,6 +23,9 @@ class TransactionController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+        if ($request->filled('method')) {
+            $query->where('method', $request->input('method'));
+        }
 
         if ($request->filled('date_start')) {
             $query->whereDate('created_at', '>=', $request->date_start);
@@ -64,6 +67,4 @@ class TransactionController extends Controller
         ]);
     }
 
-
-    
 }

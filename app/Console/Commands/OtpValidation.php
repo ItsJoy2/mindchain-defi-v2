@@ -13,7 +13,7 @@ class OtpValidation extends Command
 
     public function handle()
     {
-        Transaction::where('method', 'User Transfer')
+        Transaction::where('method', 'Transfer')
             ->where('status', 'Pending')
             ->where('updated_at', '<=', now()->subMinutes(3))
             ->update([

@@ -72,7 +72,7 @@ class TransferController extends Controller
 
             // remove old pending
             Transaction::where('user_id', $sender->id)
-                ->where('method', 'User Transfer')
+                ->where('method', 'Transfer')
                 ->where('status', 'Pending')
                 ->delete();
 
@@ -82,7 +82,7 @@ class TransferController extends Controller
                 'amount'            => -$request->amount,
                 'wallet'            => $request->wallet,
                 'type'              => 'Debit',
-                'method'            => 'User Transfer',
+                'method'            => 'Transfer',
                 'description'       =>  -$request->amount . ' ' . $request->wallet . ' Transfer To ' . $receiver->user_name,
                 'txn_id'            => strtoupper(Str::random(10)),
                 'confirmation_code' => $otp,
@@ -195,7 +195,7 @@ class TransferController extends Controller
                 'amount'        => $amount,
                 'wallet'        => $wallet,
                 'type'          => 'Credit',
-                'method'        => 'User Transfer',
+                'method'        => 'Transfer',
                 'description'   => $amount . ' ' . $wallet . ' Received From ' . $sender->user_name,
                 'txn_id'        => strtoupper(Str::random(10)),
                 'status'        => 'Approved',
@@ -232,7 +232,7 @@ class TransferController extends Controller
             $sender = Auth::user();
 
             $transaction = Transaction::where('user_id', $sender->id)
-                ->where('method', 'User Transfer')
+                ->where('method', 'Transfer')
                 ->where('status', 'Pending')
                 ->latest()
                 ->first();
