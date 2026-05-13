@@ -149,7 +149,7 @@ class TransferController extends Controller
             }
 
 
-            if ($transaction->updated_at->addMinutes(5)->isPast()) {
+            if ($transaction->updated_at->addMinutes(3)->isPast()) {
 
                 $transaction->update([
                     'status' => 'Expired',
@@ -245,7 +245,7 @@ class TransferController extends Controller
                 ], 404);
             }
 
-            if ($transaction->updated_at->addMinutes(5)->isPast()) {
+            if ($transaction->updated_at->addMinutes(3)->isPast()) {
 
                 $transaction->update([
                     'status' => 'Expired',

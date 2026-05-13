@@ -473,7 +473,8 @@ class AuthController extends Controller
     }
 
 
-        public function forgotPassword(Request $request)
+    // FORGOT PASSWORD
+    public function forgotPassword(Request $request)
     {
         try {
 
@@ -506,10 +507,10 @@ class AuthController extends Controller
             ]);
 
             // Reset Link
-            $resetLink = url('/reset-password?token=' . $token . '&email=' . $request->email);
+            $resetLink ='https://mindchainwallet.com/auth/reset-password?token=' . $token;
 
             // Send Mail
-            Mail::send('emails.resetMailVerification', [
+            Mail::send('emails.emailVerification', [
                 'title' => 'Secure Password Reset',
                 'subHeader' => 'Security Notification',
                 'heading' => 'Reset Your Password',

@@ -98,7 +98,7 @@
                                     line-height:28px;
                                     color:#6b7280;
                                 ">
-                                This OTP is valid for a 5 minute period and can only be used once.
+                                This OTP is valid for a 3 minute period and can only be used once.
                             </p>
 
                             <p style="
