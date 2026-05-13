@@ -31,13 +31,6 @@ class TransferController extends Controller
 
             $sender = Auth::user();
 
-            if (!$sender) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthorized'
-                ], 401);
-            }
-
             $validator = Validator::make($request->all(), [
                 'user_name' => 'required|exists:users,user_name',
                 'wallet'  => 'required|in:MIND,MUSD,USDT,BMIND',
@@ -129,13 +122,6 @@ class TransferController extends Controller
 
             $sender = Auth::user();
 
-            if (!$sender) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthorized'
-                ], 401);
-            }
-
             $validator = Validator::make($request->all(), [
                 'otp' => 'required|numeric'
             ]);
@@ -154,27 +140,47 @@ class TransferController extends Controller
                 ->first();
 
             if (!$transaction) {
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid OTP'
                 ], 422);
             }
 
+
+            if ($transaction->updated_at->addMinutes(5)->isPast()) {
+
+                $transaction->update([
+                    'status' => 'Expired',
+                    'confirmation_code' => null
+                ]);
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'OTP expired. Please request again.'
+                ], 422);
+            }
+
+
             $receiver = User::find($transaction->receiver_id);
 
             if (!$receiver) {
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Receiver not found'
                 ], 404);
             }
 
+
             $wallet = $transaction->wallet;
             $amount = abs($transaction->amount);
 
             if (!$this->walletService->hasBalance($sender->id, $wallet, $amount)) {
 
-                $transaction->update(['status' => 'Reject']);
+                $transaction->update([
+                    'status' => 'Reject'
+                ]);
 
                 return response()->json([
                     'status' => false,
@@ -182,7 +188,7 @@ class TransferController extends Controller
                 ], 422);
             }
 
-            // CREDIT RECEIVER
+
             Transaction::create([
                 'user_id'       => $receiver->id,
                 'amount'        => $amount,
@@ -193,6 +199,7 @@ class TransferController extends Controller
                 'txn_id'        => strtoupper(Str::random(10)),
                 'status'        => 'Approved',
             ]);
+
 
             $transaction->update([
                 'status' => 'Approved',
@@ -209,6 +216,74 @@ class TransferController extends Controller
         } catch (\Exception $e) {
 
             DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function resendTransferOtp(Request $request)
+    {
+        try {
+
+            $sender = Auth::user();
+
+            $transaction = Transaction::where('user_id', $sender->id)
+                ->where('method', 'User Transfer')
+                ->where('status', 'Pending')
+                ->latest()
+                ->first();
+
+            if (!$transaction) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No pending transfer found'
+                ], 404);
+            }
+
+            if ($transaction->updated_at->addMinutes(5)->isPast()) {
+
+                $transaction->update([
+                    'status' => 'Expired',
+                    'confirmation_code' => null
+                ]);
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'OTP expired. Please create new transfer.'
+                ], 422);
+            }
+
+
+            $otp = rand(100000, 999999);
+
+            $transaction->update([
+                'confirmation_code' => $otp,
+                'updated_at' => now()
+            ]);
+
+
+            if ($sender->email) {
+
+                Mail::to($sender->email)->send(
+                    new OtpMail(
+                        $otp,
+                        'Resend Transfer OTP',
+                        'Secure Wallet Transfer',
+                        'Use this OTP to confirm your wallet transfer'
+                    )
+                );
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'OTP resent successfully'
+            ]);
+
+        } catch (\Exception $e) {
 
             return response()->json([
                 'status' => false,

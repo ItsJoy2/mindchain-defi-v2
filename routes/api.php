@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('transfer/send-otp', [TransferController::class, 'sendTransferOtp']);
     Route::post('transfer/confirm', [TransferController::class, 'confirmTransfer']);
+    Route::post('transfer/resend-otp', [TransferController::class, 'resendTransferOtp']);
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });
