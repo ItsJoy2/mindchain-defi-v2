@@ -590,10 +590,11 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            // Update password (AUTO EMAIL FOUND)
-            User::where('email', $matched->email)->update([
-                'password' => $request->password
-            ]);
+            // Update password
+            $user = User::where('email', $matched->email)->first();
+
+            $user->password = $request->password;
+            $user->save();
 
             // delete token
             DB::table('password_reset_tokens')
@@ -662,6 +663,67 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
 
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function profileUpdate(Request $request)
+    {
+        try {
+
+            $user = auth()->user();
+
+            $validator = Validator::make($request->all(), [
+                'name'          => 'nullable|string|max:255',
+                'contact'       => 'nullable|string|max:100',
+                'address'       => 'nullable|string|max:255',
+                'city'          => 'nullable|string|max:150',
+                'country'       => 'nullable|string|max:150',
+                'postal_code'   => 'nullable|string|max:100',
+                'date_of_birth' => 'nullable|date',
+                'gender'        => 'nullable|string|max:10',
+                'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $data = $validator->validated();
+
+            /* =========================
+               IMAGE HANDLE (Controller)
+            ==========================*/
+            if ($request->hasFile('image')) {
+
+                $file = $request->file('image');
+
+                // delete old image if exists
+                if ($user->image && Storage::disk('public')->exists($user->image)) {
+                    Storage::disk('public')->delete($user->image);
+                }
+
+                // store new image
+                $path = $file->store('users', 'public');
+
+                $data['image'] = $path;
+            }
+
+            $user->update($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Profile updated successfully',
+                'data' => $user
+            ]);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()

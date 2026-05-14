@@ -23,6 +23,8 @@ class MindWalletController extends Controller
     {
         try {
 
+            $user = auth()->user();
+
             $staking = MindStakingSetting::first();
 
             if (!$staking) {
@@ -31,6 +33,33 @@ class MindWalletController extends Controller
                     'message' => 'Staking settings not found',
                     'data' => null
                 ]);
+            }
+
+            // USER TOTAL STAKED
+            $myStaked = 0;
+
+            // USER TOTAL REWARDS
+            $totalRewards = 0;
+
+            // NETWORK APR (average)
+            $networkApr = number_format(
+                (
+                    $staking->days_180 +
+                    $staking->days_365 +
+                    $staking->days_730 +
+                    $staking->days_1825
+                ) / 4,
+                2
+            );
+
+            if ($user) {
+
+                $myStaked = MindPurchaseStake::where('user_id', $user->id)
+                    ->where('status', 1)
+                    ->sum('amount');
+
+                $totalRewards = MindPurchaseStake::where('user_id', $user->id)
+                    ->sum('total_value');
             }
 
             $plans = [
@@ -65,6 +94,9 @@ class MindWalletController extends Controller
                 'status' => true,
                 'message' => 'MIND Staking data retrieved successfully',
                 'data' => [
+                     'network_apr' => $networkApr . '%',
+                    'your_staked' => number_format($myStaked, 2),
+                    'total_rewards' => number_format($totalRewards, 2),
                     'min_staking' => $staking->min_staking,
                     'max_staking' => $staking->max_staking,
                     'plans' => $plans
