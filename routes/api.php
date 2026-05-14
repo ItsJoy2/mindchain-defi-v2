@@ -39,16 +39,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('join-elite-v2', [EliteClubController::class, 'joinEliteV2']);
 
     // MIND STAKING
-    Route::get('mind-staking', [MindWalletController::class, 'mindStaking']);
     Route::post('mind-staking/store', [MindWalletController::class, 'mindStakingStore']);
     Route::post('mind-staking-marge', [MindWalletController::class, 'mindStakingMarge']);
 
+    // STAKING Data & History
     Route::get('staking-data',[StakingHistoryController::class, 'index']);
     Route::get('staking-history',[StakingHistoryController::class, 'stakingHistory']);
 
-    Route::get('bmind-staking', [BmindWalletController::class,'bmindStaking']);
+    // BMIND STAKING
     Route::post('bmind-staking/store', [BmindWalletController::class,'storeBmindStaking']);
 
+    // TRANSFER
     Route::post('transfer/send-otp', [TransferController::class, 'sendTransferOtp']);
     Route::post('transfer/confirm', [TransferController::class, 'confirmTransfer']);
     Route::post('transfer/resend-otp', [TransferController::class, 'resendTransferOtp']);
