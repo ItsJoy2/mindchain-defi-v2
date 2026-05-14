@@ -3,12 +3,170 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\BmindStakingSetting;
+use App\Models\MindStakingSetting;
 use App\Models\PurchaseStaking;
 use Illuminate\Http\Request;
 
 class StakingHistoryController extends Controller
 {
-    public function index(Request $request)
+
+    public function index()
+    {
+        try {
+
+            $user = auth()->user();
+
+            $bmindSetting = BmindStakingSetting::first();
+            $mindSetting  = MindStakingSetting::first();
+
+            if (!$bmindSetting || !$mindSetting) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Staking settings not found',
+                    'data' => null
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | BMIND DATA
+            |--------------------------------------------------------------------------
+            */
+
+            $bmindStaked = 0;
+            $bmindRewards = 0;
+
+            if ($user) {
+
+                $bmindStaked = PurchaseStaking::where('user_id', $user->id)
+                    ->where('wallet', 'BMIND')
+                    ->where('status', 1)
+                    ->sum('amount');
+
+                $bmindRewards = PurchaseStaking::where('user_id', $user->id)
+                    ->where('wallet', 'BMIND')
+                    ->where('status', 1)
+                    ->sum('total_value');
+            }
+
+            $bmindNetworkApr = number_format(
+                (
+                    $bmindSetting->days_180 +
+                    $bmindSetting->days_365 +
+                    $bmindSetting->days_730
+                ) / 3,
+                2
+            );
+
+            $bmindPlans = [
+                [
+                    'title' => '180 Days',
+                    'days'  => 180,
+                    'apy'   => number_format($bmindSetting->days_180, 2)
+                ],
+                [
+                    'title' => '365 Days',
+                    'days'  => 365,
+                    'apy'   => number_format($bmindSetting->days_365, 2)
+                ],
+                [
+                    'title' => '730 Days',
+                    'days'  => 730,
+                    'apy'   => number_format($bmindSetting->days_730, 2)
+                ],
+            ];
+
+            /*
+            |--------------------------------------------------------------------------
+            | MIND DATA
+            |--------------------------------------------------------------------------
+            */
+
+            $mindStaked = 0;
+            $mindRewards = 0;
+
+            if ($user) {
+
+                $mindStaked = PurchaseStaking::where('user_id', $user->id)
+                    ->where('wallet', 'MIND')
+                    ->where('status', 1)
+                    ->sum('amount');
+
+                $mindRewards = PurchaseStaking::where('user_id', $user->id)
+                    ->where('wallet', 'MIND')
+                    ->where('status', 1)
+                    ->sum('total_value');
+            }
+
+            $mindNetworkApr = number_format(
+                (
+                    $mindSetting->days_180 +
+                    $mindSetting->days_365 +
+                    $mindSetting->days_730 +
+                    $mindSetting->days_1825
+                ) / 4,
+                2
+            );
+
+            $mindPlans = [
+                [
+                    'title' => '180 Days',
+                    'days'  => 180,
+                    'apy'   => number_format($mindSetting->days_180, 2)
+                ],
+                [
+                    'title' => '365 Days',
+                    'days'  => 365,
+                    'apy'   => number_format($mindSetting->days_365, 2)
+                ],
+                [
+                    'title' => '730 Days',
+                    'days'  => 730,
+                    'apy'   => number_format($mindSetting->days_730, 2)
+                ],
+                [
+                    'title' => '1825 Days',
+                    'days'  => 1825,
+                    'apy'   => number_format($mindSetting->days_1825, 2)
+                ],
+            ];
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Staking data retrieved successfully',
+                'data' => [
+
+                    'bmind' => [
+                        'network_apr'  => $bmindNetworkApr . '%',
+                        'your_staked'  => number_format($bmindStaked, 2),
+                        'total_rewards'=> number_format($bmindRewards, 2),
+                        'min_staking'  => $bmindSetting->min_staking,
+                        'max_staking'  => $bmindSetting->max_staking,
+                        'plans'        => $bmindPlans
+                    ],
+
+                    'mind' => [
+                        'network_apr'  => $mindNetworkApr . '%',
+                        'your_staked'  => number_format($mindStaked, 2),
+                        'total_rewards'=> number_format($mindRewards, 2),
+                        'min_staking'  => $mindSetting->min_staking,
+                        'max_staking'  => $mindSetting->max_staking,
+                        'plans'        => $mindPlans
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    public function stakingHistory(Request $request)
     {
         try {
 
@@ -19,6 +177,20 @@ class StakingHistoryController extends Controller
             $wallet  = $request->get('wallet');
 
             $query = PurchaseStaking::where('user_id', $user->id);
+
+            if ($request->filled('status')) {
+
+                switch (strtolower($request->status)) {
+
+                    case 'Running':
+                        $query->where('status', 1);
+                        break;
+
+                    case 'Expired':
+                        $query->where('status', 0);
+                        break;
+                }
+            }
 
             if ($wallet) {
                 $query->where('wallet', $wallet);

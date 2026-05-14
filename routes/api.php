@@ -43,7 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('mind-staking/store', [MindWalletController::class, 'mindStakingStore']);
     Route::post('mind-staking-marge', [MindWalletController::class, 'mindStakingMarge']);
 
-    Route::get('staking-history',[StakingHistoryController::class, 'index']);
+    Route::get('staking-data',[StakingHistoryController::class, 'index']);
+    Route::get('staking-history',[StakingHistoryController::class, 'stakingHistory']);
 
     Route::get('bmind-staking', [BmindWalletController::class,'bmindStaking']);
     Route::post('bmind-staking/store', [BmindWalletController::class,'storeBmindStaking']);
