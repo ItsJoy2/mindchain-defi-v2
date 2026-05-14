@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\MindPurchaseStake;
+use App\Models\PurchaseStaking;
 use App\Models\Transaction;
 use App\Models\AmbassadorHistory;
 use App\Models\User;
@@ -17,7 +17,7 @@ class MindDailyStaking extends Command
     {
         try {
 
-            $purchases = MindPurchaseStake::where('status', 1)->get();
+            $purchases = PurchaseStaking::where('status', 1)->get();
 
             foreach ($purchases as $row) {
 

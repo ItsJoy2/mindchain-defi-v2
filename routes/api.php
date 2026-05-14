@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\BmindWalletController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EliteClubController;
 use App\Http\Controllers\API\MindWalletController;
+use App\Http\Controllers\API\StakingHistoryController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\TransferController;
 use Illuminate\Support\Facades\Route;
@@ -40,7 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('mind-staking', [MindWalletController::class, 'mindStaking']);
     Route::post('mind-staking/store', [MindWalletController::class, 'mindStakingStore']);
     Route::post('mind-staking-marge', [MindWalletController::class, 'mindStakingMarge']);
-    Route::get('mind-staking-history',[MindWalletController::class, 'mindStakingHistory']);
+
+    Route::get('staking-history',[StakingHistoryController::class, 'index']);
+
+    Route::get('bmind-staking', [BmindWalletController::class,'bmindStaking']);
+    Route::post('bmind-staking/store', [BmindWalletController::class,'storeBmindStaking']);
 
     Route::post('transfer/send-otp', [TransferController::class, 'sendTransferOtp']);
     Route::post('transfer/confirm', [TransferController::class, 'confirmTransfer']);

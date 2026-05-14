@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MindPurchaseStake extends Model
+class PurchaseStaking extends Model
 {
     use HasFactory;
 
-    protected $table = 'mind_purchase_stake';
+    protected $table = 'purchase_stakings';
 
     protected $fillable = [
         'user_id',
+        'wallet',
         'amount',
         'duration',
         'received_days',

@@ -8,9 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('mind_purchase_stake', function (Blueprint $table) {
+        Schema::create('purchase_stakings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->index();
+            $table->enum('wallet', ['MIND', 'MUSD', 'BMIND', 'USDT'])->default('MIND')->after('user_id');
             $table->decimal('amount', 18, 8);
             $table->integer('duration');
             $table->integer('received_days')->default(0);
@@ -26,6 +27,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('mind_purchase_stake');
+        Schema::dropIfExists('purchase_stakings');
     }
 };

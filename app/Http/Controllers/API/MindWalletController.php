@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\AmbassadorHistory;
 use App\Models\LevelSetting;
-use App\Models\MindPurchaseStake;
+use App\Models\PurchaseStaking;
 use App\Models\MindStakingSetting;
 use App\Models\Transaction;
 use App\Models\User;
@@ -54,11 +54,12 @@ class MindWalletController extends Controller
 
             if ($user) {
 
-                $myStaked = MindPurchaseStake::where('user_id', $user->id)
+                $myStaked = PurchaseStaking::where('user_id', $user->id)
                     ->where('status', 1)
                     ->sum('amount');
 
-                $totalRewards = MindPurchaseStake::where('user_id', $user->id)
+                $totalRewards = PurchaseStaking::where('user_id', $user->id)
+                    ->where('status', 1)
                     ->sum('total_value');
             }
 
@@ -266,7 +267,7 @@ class MindWalletController extends Controller
             }
 
             // Create staking purchase record
-            $purchase = MindPurchaseStake::create([
+            $purchase = PurchaseStaking::create([
                 'user_id' => $user->id,
                 'amount' => $amount,
                 'duration' =>$duration,
@@ -505,7 +506,7 @@ class MindWalletController extends Controller
             $total_value = $daily * $days;
 
             //  CREATE STAKE FOR RECEIVER
-            $purchase = MindPurchaseStake::create([
+            $purchase = PurchaseStaking::create([
                 'user_id' => $receiver->id,
                 'amount' => $amount,
                 'duration' => $duration,
@@ -600,68 +601,6 @@ class MindWalletController extends Controller
         } catch (\Exception $e) {
 
             DB::rollBack();
-
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // MIND staking history
-    public function mindStakingHistory(Request $request)
-    {
-        try {
-
-            $user = auth()->user();
-
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthorized'
-                ], 401);
-            }
-
-            $perPage = (int) $request->get('per_page', 10);
-
-            $histories = MindPurchaseStake::where('user_id', $user->id)
-                ->select([
-                    'id',
-                    'amount',
-                    'duration',
-                    'received_days',
-                    'daily',
-                    'status',
-                    'created_at'
-                ])
-                ->orderByDesc('id')
-                ->paginate($perPage);
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Mind staking history retrieved successfully',
-                'data' => collect($histories->items())->map(function ($row) {
-
-                    return [
-                        'id' => $row->id,
-                        'amount' => (float) $row->amount,
-                        'duration' => (int) $row->duration,
-                        'received_days' => (int) $row->received_days,
-                        'daily' => (float) $row->daily,
-                        'status' => $row->status == 1 ? 'Running' : 'Expired',
-                        'created_at' => $row->created_at->format('d M Y'),
-                    ];
-                }),
-
-                'pagination' => [
-                    'page' => $histories->currentPage(),
-                    'per_page' => $histories->perPage(),
-                    'total' => $histories->total(),
-                ]
-
-            ]);
-
-        } catch (\Exception $e) {
 
             return response()->json([
                 'status' => false,

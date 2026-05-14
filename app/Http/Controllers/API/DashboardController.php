@@ -7,7 +7,7 @@ use App\Models\AmbassadorHistory;
 use App\Models\AngelWalletHistory;
 use App\Models\BmindStakingHistory;
 use App\Models\EliteV2StakingHistory;
-use App\Models\MindPurchaseStake;
+use App\Models\PurchaseStaking;
 use App\Models\MindStakingHistory;
 use App\Models\MusdStakingHistory;
 use App\Models\Transaction;
@@ -22,13 +22,6 @@ class DashboardController extends Controller
         try {
 
             $user = Auth::user();
-
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthorized'
-                ], 401);
-            }
 
             $userId = $user->id;
 
@@ -83,13 +76,13 @@ class DashboardController extends Controller
                 ],
 
                 'mind_staking' => [
-                    'balance' => number_format(MindPurchaseStake::where('user_id', $userId)->where('status', 1)->sum('amount'), 2),
-                    'value'   => number_format(MindPurchaseStake::where('user_id', $userId)->where('status', 1)->sum('amount') * $mind_price, 2),
+                    'balance' => number_format(PurchaseStaking::where('user_id', $userId)->where('wallet', 'MIND')->where('status', 1)->sum('amount'), 2),
+                    'value'   => number_format(PurchaseStaking::where('user_id', $userId)->where('wallet', 'MIND')->where('status', 1)->sum('amount') * $mind_price, 2),
                 ],
 
                 'bmind_staking' => [
-                    'balance' => number_format(BmindStakingHistory::where('user_id', $userId)->sum('amount'), 2),
-                    'value'   => number_format(BmindStakingHistory::where('user_id', $userId)->sum('amount') * $bmind_price, 2),
+                    'balance' => number_format(PurchaseStaking::where('user_id', $userId)->where('wallet', 'BMIND')->where('status', 1)->sum('amount'), 2),
+                    'value'   => number_format(PurchaseStaking::where('user_id', $userId)->where('wallet', 'BMIND')->where('status', 1)->sum('amount') * $bmind_price, 2),
                     ],
 
                 'ambassador_wallet' => [
