@@ -33,7 +33,7 @@ class DashboardController extends Controller
             $usdt_price  = 1;
 
             $walletIcons = WalletIcon::pluck('value', 'key')->map(function ($path) {
-                return asset('storage/' . $path);
+                return asset($path);
             });
 
             $icons = [
