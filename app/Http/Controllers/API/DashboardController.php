@@ -5,14 +5,10 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\AmbassadorHistory;
 use App\Models\AngelWalletHistory;
-use App\Models\BmindStakingHistory;
 use App\Models\EliteV2StakingHistory;
-use App\Models\MindStakingHistory;
-use App\Models\MusdStakingHistory;
 use App\Models\PurchaseStaking;
 use App\Models\Transaction;
 use App\Models\WalletIcon;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -103,8 +99,8 @@ class DashboardController extends Controller
                     ],
 
                 'musd_staking' => [
-                    'balance' => number_format(MusdStakingHistory::where('user_id', $userId)->sum('amount'), 2),
-                    'value'   => number_format(MusdStakingHistory::where('user_id', $userId)->sum('amount') * $musd_price, 2),
+                    'balance' => number_format(PurchaseStaking::where('user_id', $userId)->where('wallet', 'MUSD')->where('status', 1)->sum('amount'), 2),
+                    'value'   => number_format(PurchaseStaking::where('user_id', $userId)->where('wallet', 'MUSD')->where('status', 1)->sum('amount') * $musd_price, 2),
                 ],
 
                 'angel_wallet' => [

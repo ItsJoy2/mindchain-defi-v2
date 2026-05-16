@@ -622,7 +622,7 @@ class AuthController extends Controller
     {
         try {
 
-            $user = auth()->user();
+            $user = Auth::user();
 
             if (!$user) {
                 return response()->json([
@@ -674,7 +674,7 @@ class AuthController extends Controller
     {
         try {
 
-            $user = auth()->user();
+            $user = Auth::user();
 
             $validator = Validator::make($request->all(), [
                 'name'          => 'nullable|string|max:255',
@@ -685,7 +685,7 @@ class AuthController extends Controller
                 'postal_code'   => 'nullable|string|max:100',
                 'date_of_birth' => 'nullable|date',
                 'gender'        => 'nullable|string|max:10',
-                'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'image'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             ]);
 
             if ($validator->fails()) {
@@ -697,33 +697,51 @@ class AuthController extends Controller
 
             $data = $validator->validated();
 
-            /* =========================
-               IMAGE HANDLE (Controller)
-            ==========================*/
             if ($request->hasFile('image')) {
 
                 $file = $request->file('image');
 
-                // delete old image if exists
-                if ($user->image && Storage::disk('public')->exists($user->image)) {
-                    Storage::disk('public')->delete($user->image);
+                if ($user->image && file_exists(public_path($user->image))) {
+                    unlink(public_path($user->image));
                 }
 
-                // store new image
-                $path = $file->store('users', 'public');
+                $destinationPath = public_path('uploads/profile');
 
-                $data['image'] = $path;
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                $file->move($destinationPath, $fileName);
+
+                $data['image'] = 'uploads/profile/' . $fileName;
             }
 
             $user->update($data);
 
+            $user->image = $user->image ? asset($user->image) : null;
+
             return response()->json([
                 'status' => true,
                 'message' => 'Profile updated successfully',
-                'data' => $user
+                'data' => [
+                    'name' => $user->name,
+                    'user_name' => $user->user_name,
+                    'email' => $user->email,
+                    'contact' => $user->contact,
+                    'address' => $user->address,
+                    'city' => $user->city,
+                    'country' => $user->country,
+                    'postal_code' => $user->postal_code,
+                    'date_of_birth' => $user->date_of_birth,
+                    'gender' => $user->gender,
+                    'image' => $user->image ? asset($user->image) : null,
+                ]
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()

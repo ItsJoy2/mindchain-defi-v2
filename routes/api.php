@@ -26,7 +26,7 @@ Route::post('account/verify', [AuthController::class, 'verifyEmail']);
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('profile', [AuthController::class, 'profile']);
-    Route::post('profile/update', [AuthController::class, 'update']);
+    Route::post('profile/update', [AuthController::class, 'profileUpdate']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('change-password', [AuthController::class, 'changePassword']);
 
