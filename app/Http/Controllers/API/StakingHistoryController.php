@@ -255,7 +255,7 @@ class StakingHistoryController extends Controller
                     'status',
                     'created_at'
                 ])
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
             return response()->json([

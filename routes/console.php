@@ -24,3 +24,6 @@ Schedule::command('otp:expire')->everyMinute();
 
 // BMIND STAKING
 // Schedule::command('bmind:staking-daily')->dailyAt('00:05');
+
+// MUSD STAKING
+// Schedule::command('musd:staking-daily')->dailyAt('00:25');
