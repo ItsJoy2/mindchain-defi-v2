@@ -5,6 +5,7 @@ use App\Http\Controllers\API\BmindWalletController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EliteClubController;
 use App\Http\Controllers\API\MindWalletController;
+use App\Http\Controllers\API\MusdWalletController;
 use App\Http\Controllers\API\StakingHistoryController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\TransferController;
@@ -38,16 +39,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('join-elite-club', [EliteClubController::class, 'joinElite']);
     Route::post('join-elite-v2', [EliteClubController::class, 'joinEliteV2']);
 
-    // MIND STAKING
-    Route::post('mind-staking/store', [MindWalletController::class, 'mindStakingStore']);
-    Route::post('mind-staking-marge', [MindWalletController::class, 'mindStakingMarge']);
-
     // STAKING Data & History
     Route::get('staking-data',[StakingHistoryController::class, 'index']);
     Route::get('staking-history',[StakingHistoryController::class, 'stakingHistory']);
 
+    // MIND STAKING
+    Route::post('mind-staking/store', [MindWalletController::class, 'mindStakingStore']);
+    Route::post('mind-staking-marge', [MindWalletController::class, 'mindStakingMarge']);
+
     // BMIND STAKING
     Route::post('bmind-staking/store', [BmindWalletController::class,'storeBmindStaking']);
+
+    // MUSD STAKING
+    Route::post('musd-staking/store', [MusdWalletController::class, 'storeMusdStaking']);
 
     // TRANSFER
     Route::post('transfer/send-otp', [TransferController::class, 'sendTransferOtp']);

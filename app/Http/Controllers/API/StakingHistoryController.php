@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\BmindStakingSetting;
 use App\Models\MindStakingSetting;
+use App\Models\MusdStakingSetting;
 use App\Models\PurchaseStaking;
 use Illuminate\Http\Request;
 
@@ -19,8 +20,9 @@ class StakingHistoryController extends Controller
 
             $bmindSetting = BmindStakingSetting::first();
             $mindSetting  = MindStakingSetting::first();
+            $musdSetting  = MusdStakingSetting::first();
 
-            if (!$bmindSetting || !$mindSetting) {
+            if (!$bmindSetting || !$mindSetting || !$musdSetting) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Staking settings not found',
@@ -132,6 +134,44 @@ class StakingHistoryController extends Controller
                 ],
             ];
 
+             /*
+            |--------------------------------------------------------------------------
+            | MUSD DATA
+            |--------------------------------------------------------------------------
+            */
+
+            $musdStaked = 0;
+            $musdRewards = 0;
+
+            if ($user) {
+
+                $musdStaked = PurchaseStaking::where('user_id', $user->id)
+                    ->where('wallet', 'MUSD')
+                    ->where('status', 1)
+                    ->sum('amount');
+
+                $musdRewards = PurchaseStaking::where('user_id', $user->id)
+                    ->where('wallet', 'MUSD')
+                    ->where('status', 1)
+                    ->sum('total_value');
+            }
+
+            $musdNetworkApr = number_format(
+                (
+                    $musdSetting->days_365 +
+                    $musdSetting->days_730 +
+                    $musdSetting->days_1825
+                ) / 3,
+                2
+            );
+
+            $musdPlans = [
+                ['title' => '365 Days',  'days' => 365,  'apy' => number_format($musdSetting->days_365, 2)],
+                ['title' => '730 Days',  'days' => 730,  'apy' => number_format($musdSetting->days_730, 2)],
+                ['title' => '1825 Days', 'days' => 1825, 'apy' => number_format($musdSetting->days_1825, 2)],
+            ];
+
+
             return response()->json([
                 'status' => true,
                 'message' => 'Staking data retrieved successfully',
@@ -153,6 +193,15 @@ class StakingHistoryController extends Controller
                         'min_staking'  => $mindSetting->min_staking,
                         'max_staking'  => $mindSetting->max_staking,
                         'plans'        => $mindPlans
+                    ],
+
+                    'musd' => [
+                        'network_apr'  => $musdNetworkApr . '%',
+                        'your_staked'  => number_format($musdStaked, 2),
+                        'total_rewards'=> number_format($musdRewards, 2),
+                        'min_staking'  => $musdSetting->min_staking,
+                        'max_staking'  => $musdSetting->max_staking,
+                        'plans'        => $musdPlans
                     ]
                 ]
             ]);
