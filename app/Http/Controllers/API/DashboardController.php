@@ -7,10 +7,11 @@ use App\Models\AmbassadorHistory;
 use App\Models\AngelWalletHistory;
 use App\Models\BmindStakingHistory;
 use App\Models\EliteV2StakingHistory;
-use App\Models\PurchaseStaking;
 use App\Models\MindStakingHistory;
 use App\Models\MusdStakingHistory;
+use App\Models\PurchaseStaking;
 use App\Models\Transaction;
+use App\Models\WalletIcon;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,17 @@ class DashboardController extends Controller
             $musd_price  = 0.95;
             $bmind_price = 0.06;
             $usdt_price  = 1;
+
+            $walletIcons = WalletIcon::pluck('value', 'key')->map(function ($path) {
+                return asset('storage/' . $path);
+            });
+
+            $icons = [
+                'MIND' => $walletIcons['MIND'] ?? null,
+                'BMIND' => $walletIcons['BMIND'] ?? null,
+                'MUSD' => $walletIcons['MUSD'] ?? null,
+                'USDT' => $walletIcons['USDT'] ?? null,
+            ];
 
             // Wallet Amounts
             $mind_wallet = Transaction::where('user_id', $userId)
@@ -160,6 +172,7 @@ class DashboardController extends Controller
                 'message' => 'Dashboard data fetched successfully',
 
                 'data' => [
+                    'wallet_icons' => $icons,
                     'wallets'      => $wallets,
                     // 'prices' => [
                     //     'mind_price'  => $mind_price,
