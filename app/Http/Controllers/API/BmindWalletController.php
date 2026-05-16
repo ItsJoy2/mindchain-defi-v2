@@ -140,8 +140,8 @@ class BmindWalletController extends Controller
                     'id'           => $staking->id,
                     'amount'       => $staking->amount,
                     'duration'     => $staking->duration,
-                    'daily_profit' => $dailyProfit,
-                    'total_profit' => $totalProfit,
+                    'daily_profit' => number_format($dailyProfit, 2),
+                    'total_profit' => number_format($totalProfit, 2),
                 ]
             ]);
 

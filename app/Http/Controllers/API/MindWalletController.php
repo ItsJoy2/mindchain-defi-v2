@@ -415,9 +415,9 @@ class MindWalletController extends Controller
                 'duration' => $duration,
                 'received_days' => 0,
                 'apy_value' => $apy_value,
-                'daily' => number_format($daily, 5),
+                'daily' => number_format($daily, 2),
                 'seller_bonus_rate' => $staking->seller_bonus,
-                'total_value' => number_format($total_value, 5),
+                'total_value' => number_format($total_value, 2),
                 'status' => 1
             ]);
 
