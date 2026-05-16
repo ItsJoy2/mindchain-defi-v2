@@ -250,19 +250,10 @@ class AuthController extends Controller
 
         $verify->delete();
 
-        $authToken = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'status' => true,
-            'message' => 'Email verified successfully',
-            'data' => [
-                'token' => $authToken,
-                'user' => [
-                    'user_name' => $user->user_name,
-                    'email' => $user->email,
-                    'email_verified' => 'Verified'
-                ]
-            ]
+            'message' => 'Email verified successfully'
         ]);
     }
 
