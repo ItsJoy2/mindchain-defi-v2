@@ -9,7 +9,7 @@ class OtpValidation extends Command
 {
     protected $signature = 'otp:expire';
 
-    protected $description = 'Expire pending OTP transactions after 7 minutes';
+    protected $description = 'Expire pending OTP transactions after 3 minutes';
 
     public function handle()
     {
