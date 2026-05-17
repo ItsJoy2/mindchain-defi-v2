@@ -251,8 +251,8 @@ class MindWalletController extends Controller
                     'duration' => $purchase->duration,
                     'apy' => $apy,
                     'apy_value' => $purchase->apy_value,
-                    'daily' => number_format($purchase->daily, 4),
-                    'total_value' => number_format($purchase->total_value, 4),
+                    'daily' => number_format($purchase->daily, 2),
+                    'total_value' => number_format($purchase->total_value, 2),
                 ]
             ]);
 
@@ -415,9 +415,9 @@ class MindWalletController extends Controller
                 'duration' => $duration,
                 'received_days' => 0,
                 'apy_value' => $apy_value,
-                'daily' => number_format($daily, 2),
+                'daily' => number_format($daily, 5),
                 'seller_bonus_rate' => $staking->seller_bonus,
-                'total_value' => number_format($total_value, 2),
+                'total_value' => number_format($total_value, 5),
                 'status' => 1
             ]);
 
@@ -496,8 +496,8 @@ class MindWalletController extends Controller
                     'to' => $receiver->user_name,
                     'amount' => $amount,
                     'apy_value' => $apy_value,
-                    'daily' => number_format($daily, 4),
-                    'total_value' => number_format($total_value, 4)
+                    'daily' => number_format($daily, 2),
+                    'total_value' => number_format($total_value, 2)
                 ]
             ]);
 
