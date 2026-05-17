@@ -8,7 +8,9 @@ use App\Models\AngelWalletHistory;
 use App\Models\EliteV2StakingHistory;
 use App\Models\PurchaseStaking;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Models\WalletIcon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -190,5 +192,36 @@ class DashboardController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function checkUser(Request $request)
+    {
+        $request->validate([
+            'value' => 'required|string'
+        ]);
+
+        $value = $request->value;
+
+        $user = User::where('user_name', $value)
+            ->orWhere('email', $value)
+            ->orWhere('referral_code', $value)
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User found',
+            'data' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'user_name' => $user->user_name,
+            ]
+        ]);
     }
 }
