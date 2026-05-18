@@ -21,7 +21,49 @@ class AngelClubController extends Controller
     {
         $this->walletService = $walletService;
     }
+    public function index()
+    {
+        try {
 
+            $angel = AngelSetting::first();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Angel settings fetched successfully',
+
+                'data' => [
+
+                    'membership_fee' => number_format($angel->membership_fee ?? 0, 2),
+                    'apy'           => number_format($angel->apy ?? 0, 0),
+                    'daily_bonus'   => isset($angel->membership_fee, $angel->apy)? number_format((($angel->membership_fee * $angel->apy / 100) / 365), 2) : number_format(0, 2),
+
+
+                    // 'angel' => [
+                    //     'membership_fee' => $angel->membership_fee ?? 0,
+                    //     'total_member'  => $angel->total_member ?? 0,
+                    //     'duration'      => $angel->duration ?? 0,
+                    //     'apy'           => $angel->apy ?? 0,
+                    //     'daily_bonus'   => isset($angel->membership_fee, $angel->apy)
+                    //         ? (($angel->membership_fee * $angel->apy / 100) / 365)
+                    //         : 0,
+                    //     'level_1_bonus' => $angel->level_1_bonus ?? 0,
+                    //     'level_2_bonus' => $angel->level_2_bonus ?? 0,
+                    //     'level_3_bonus' => $angel->level_3_bonus ?? 0,
+                    //     'status'        => $angel->status ?? 0,
+                    // ]
+                ]
+
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function joinAngel(Request $request)
     {
         try {

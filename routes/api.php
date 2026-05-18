@@ -62,6 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('transfer/resend-otp', [TransferController::class, 'resendTransferOtp']);
 
     // ANGEL CLUB
+    Route::get('angel-club', [AngelClubController::class, 'index']);
     Route::post('join-angel', [AngelClubController::class, 'joinAngel']);
 
     Route::get('transactions', [TransactionController::class, 'index']);

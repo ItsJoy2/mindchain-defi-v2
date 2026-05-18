@@ -40,12 +40,12 @@ class DailyAngelBonus extends Command
 
                     Transaction::create([
                         'user_id' => $staking->user_id,
-                        'amount' => $staking->daily_bonus,
+                        'amount' => number_format($staking->daily_bonus, 4),
                         'wallet' => 'MUSD',
                         'type' => 'Credit',
                         'method' => 'Angel Daily Bonus',
                         'status' => 'Approved',
-                        'description' => $staking->daily_bonus . ' MUSD Daily Bonus from Angel Club'
+                        'description' => number_format($staking->daily_bonus, 2) . ' MUSD Daily Bonus from Angel Club'
                     ]);
 
                     continue;
@@ -58,12 +58,12 @@ class DailyAngelBonus extends Command
 
                     Transaction::create([
                         'user_id' => $staking->user_id,
-                        'amount' => $staking->daily_bonus,
+                        'amount' => number_format($staking->daily_bonus, 4),
                         'wallet' => 'MUSD',
                         'type' => 'Credit',
                         'method' => 'Angel Daily Bonus',
                         'status' => 'Approved',
-                        'description' => $staking->daily_bonus . ' MUSD Daily Bonus from Angel Club'
+                        'description' => number_format($staking->daily_bonus, 2) . ' MUSD Daily Bonus from Angel Club'
                     ]);
 
                     // Increase received days
