@@ -177,7 +177,11 @@ class TransferController extends Controller
             $wallet = $transaction->wallet;
             $amount = abs($transaction->amount);
 
-            if (!$this->walletService->hasBalance($sender->id, $wallet, $amount)) {
+            $currentBalance = $this->walletService->getBalance($sender->id, $wallet);
+
+            $availableBalance = $currentBalance + $amount;
+
+            if ($availableBalance < $amount) {
 
                 $transaction->update([
                     'status' => 'Reject'

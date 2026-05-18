@@ -39,7 +39,7 @@ class WalletService
         if ($wallet === 'USDT') {
 
             return $query
-                ->where('status', 'Approved')
+                ->whereIn('status', ['Approved', 'Pending'])
                 ->sum('amount');
         }
 
