@@ -32,7 +32,7 @@ class WalletService
         if ($wallet === 'BMIND') {
 
             return $query
-                ->where('status', 'Approved')
+                ->whereIn('status', ['Approved', 'Pending'])
                 ->sum('amount');
         }
 
