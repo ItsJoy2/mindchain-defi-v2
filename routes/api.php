@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AngelClubController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BmindWalletController;
 use App\Http\Controllers\API\DashboardController;
@@ -59,6 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('transfer/send-otp', [TransferController::class, 'sendTransferOtp']);
     Route::post('transfer/confirm', [TransferController::class, 'confirmTransfer']);
     Route::post('transfer/resend-otp', [TransferController::class, 'resendTransferOtp']);
+
+    // ANGEL CLUB
+    Route::post('join-angel', [AngelClubController::class, 'joinAngel']);
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });

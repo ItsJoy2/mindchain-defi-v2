@@ -355,13 +355,6 @@ class AuthController extends Controller
         try {
             $user = $request->user();
 
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthenticated user'
-                ], 401);
-            }
-
             $sponsor = null;
             if ($user->sponsor) {
                 if (!$user->sponsor->is_admin) {
@@ -409,6 +402,91 @@ class AuthController extends Controller
                 'status' => false,
                 'message' => 'Failed to fetch profile',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // PROFILE UPDATE
+    public function profileUpdate(Request $request)
+    {
+        try {
+
+            $user = Auth::user();
+
+            $validator = Validator::make($request->all(), [
+                'name'          => 'nullable|string|max:255',
+                'contact'       => 'nullable|string|max:100',
+                'address'       => 'nullable|string|max:255',
+                'city'          => 'nullable|string|max:150',
+                'country'       => 'nullable|string|max:150',
+                'postal_code'   => 'nullable|string|max:100',
+                'date_of_birth' => 'nullable|date',
+                'gender'        => 'nullable|string|max:10',
+                'image'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $data = $validator->validated();
+
+            if ($request->hasFile('image')) {
+
+                $file = $request->file('image');
+
+                // delete old image if exists
+                if ($user->image && file_exists(public_path($user->image))) {
+                    unlink(public_path($user->image));
+                }
+
+                // create folder if not exists
+                $destinationPath = public_path('uploads/profile');
+
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+
+                // generate file name
+                $fileName = time() . '_' . uniqid() . '.' . $file->extension();
+
+                // move file
+                $file->move($destinationPath, $fileName);
+
+                // save path in database
+                $data['image'] = 'uploads/profile/' . $fileName;
+            }
+            
+            $user->update($data);
+
+            $user->image = $user->image ? asset($user->image) : null;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Profile updated successfully',
+                'data' => [
+                    'name' => $user->name,
+                    'user_name' => $user->user_name,
+                    'email' => $user->email,
+                    'contact' => $user->contact,
+                    'address' => $user->address,
+                    'city' => $user->city,
+                    'country' => $user->country,
+                    'postal_code' => $user->postal_code,
+                    'date_of_birth' => $user->date_of_birth ? date('Y-m-d', strtotime($user->date_of_birth)) : null,
+                    'gender' => $user->gender,
+                    'image' => $user->image ? asset($user->image) : null,
+                ]
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -653,85 +731,6 @@ class AuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
-
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function profileUpdate(Request $request)
-    {
-        try {
-
-            $user = Auth::user();
-
-            $validator = Validator::make($request->all(), [
-                'name'          => 'nullable|string|max:255',
-                'contact'       => 'nullable|string|max:100',
-                'address'       => 'nullable|string|max:255',
-                'city'          => 'nullable|string|max:150',
-                'country'       => 'nullable|string|max:150',
-                'postal_code'   => 'nullable|string|max:100',
-                'date_of_birth' => 'nullable|date',
-                'gender'        => 'nullable|string|max:10',
-                'image'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => $validator->errors()->first()
-                ], 422);
-            }
-
-            $data = $validator->validated();
-
-            if ($request->hasFile('image')) {
-
-                $file = $request->file('image');
-
-                if ($user->image && file_exists(public_path($user->image))) {
-                    unlink(public_path($user->image));
-                }
-
-                $destinationPath = public_path('uploads/profile');
-
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0777, true);
-                }
-
-                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-
-                $file->move($destinationPath, $fileName);
-
-                $data['image'] = 'uploads/profile/' . $fileName;
-            }
-
-            $user->update($data);
-
-            $user->image = $user->image ? asset($user->image) : null;
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Profile updated successfully',
-                'data' => [
-                    'name' => $user->name,
-                    'user_name' => $user->user_name,
-                    'email' => $user->email,
-                    'contact' => $user->contact,
-                    'address' => $user->address,
-                    'city' => $user->city,
-                    'country' => $user->country,
-                    'postal_code' => $user->postal_code,
-                    'date_of_birth' => $user->date_of_birth ? date('Y-m-d', strtotime($user->date_of_birth)) : null,
-                    'gender' => $user->gender,
-                    'image' => $user->image ? asset($user->image) : null,
-                ]
-            ]);
-
-        } catch (\Throwable $e) {
 
             return response()->json([
                 'status' => false,

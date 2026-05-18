@@ -27,3 +27,6 @@ Schedule::command('otp:expire')->everyMinute();
 
 // MUSD STAKING
 // Schedule::command('musd:staking-daily')->dailyAt('00:25');
+
+// ANGEL BONUS
+// $schedule->command('angel:bonus')->dailyAt('00:30');
