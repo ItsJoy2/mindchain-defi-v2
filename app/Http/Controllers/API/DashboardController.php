@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\AmbassadorHistory;
+use App\Models\AngelStaking;
 use App\Models\AngelWalletHistory;
 use App\Models\EliteV2StakingHistory;
 use App\Models\PurchaseStaking;
@@ -106,8 +107,8 @@ class DashboardController extends Controller
                 ],
 
                 'angel_wallet' => [
-                    'balance' => number_format(AngelWalletHistory::where('user_id', $userId)->sum('amount'), 2),
-                    'value'   => number_format(AngelWalletHistory::where('user_id', $userId)->sum('amount') * $musd_price, 2),
+                    'balance' => number_format(AngelStaking::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(AngelStaking::where('user_id', $userId)->sum('amount') * $musd_price, 2),
                     ],
 
                 'elite_club' => [
