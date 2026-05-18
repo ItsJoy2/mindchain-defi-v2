@@ -177,21 +177,21 @@ class TransferController extends Controller
             $wallet = $transaction->wallet;
             $amount = abs($transaction->amount);
 
-            // $currentBalance = $this->walletService->getBalance($sender->id, $wallet);
+            $currentBalance = $this->walletService->getBalance($sender->id, $wallet);
 
-            // $availableBalance = $currentBalance + $amount;
+            $availableBalance = $currentBalance + $amount;
 
-            // if ($availableBalance < $amount) {
+            if ($availableBalance < $amount) {
 
-            //     $transaction->update([
-            //         'status' => 'Reject'
-            //     ]);
+                $transaction->update([
+                    'status' => 'Reject'
+                ]);
 
-            //     return response()->json([
-            //         'status' => false,
-            //         'message' => 'Insufficient balance'
-            //     ], 422);
-            // }
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Insufficient balance'
+                ], 422);
+            }
 
 
             Transaction::create([
