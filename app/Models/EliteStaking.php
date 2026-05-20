@@ -5,22 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EliteV2StakingHistory extends Model
+class EliteStaking extends Model
 {
     use HasFactory;
 
-    protected $table = 'elite_v2_staking_histories';
+    protected $table = 'elite_stakings';
 
     protected $fillable = [
         'user_id',
         'amount',
         'daily_bonus',
         'wallet',
-        'type',
         'duration',
         'received_days',
-        'method',
-        'description',
         'status',
     ];
 
@@ -30,6 +27,7 @@ class EliteV2StakingHistory extends Model
         'daily_bonus' => 'float',
         'duration' => 'integer',
         'received_days' => 'integer',
+        'status' => 'boolean',
     ];
 
     public function user()

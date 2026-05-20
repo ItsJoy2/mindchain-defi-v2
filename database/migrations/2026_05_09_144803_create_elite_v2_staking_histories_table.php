@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('elite_v2_staking_histories', function (Blueprint $table) {
+        Schema::create('elite_stakings', function (Blueprint $table) {
 
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('received_days')->default(0);
             $table->string('method')->nullable();
             $table->text('description')->nullable();
-            $table->enum('status', ['Pending','Approved','Reject','Expired','Processing'])->default('Pending')->index();
+            $table->boolean('status')->default(1)->index();
             $table->timestamps();
         });
     }
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('elite_v2_staking_histories');
+        Schema::dropIfExists('elite_stakings');
     }
 };

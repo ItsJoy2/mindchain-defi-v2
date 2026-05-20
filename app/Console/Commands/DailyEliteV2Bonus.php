@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\EliteStaking;
+use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
-
-use App\Models\Transaction;
-use App\Models\EliteV2StakingHistory;
 
 class DailyEliteV2Bonus extends Command
 {
@@ -19,7 +18,7 @@ class DailyEliteV2Bonus extends Command
     {
         try {
 
-            $stakings = EliteV2StakingHistory::where('status', 'Approved')->get();
+            $stakings = EliteStaking::where('wallet', 'MUSD')->get();
 
             if ($stakings->isEmpty()) {
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\EliteSetting;
+use App\Models\EliteStaking;
 use App\Models\EliteV2Setting;
 use App\Models\EliteV2StakingHistory;
 use App\Models\Transaction;
@@ -134,16 +135,14 @@ class EliteClubController extends Controller
             ]);
 
             // Add staking entry for elite membership
-            UsdtStakingHistory::create([
+            EliteStaking::create([
                 'user_id' => $user->id,
                 'amount' => $fee,
                 'daily_bonus' => $setting->daily_bonus,
                 'wallet' => 'USDT',
-                'type' => 'Debit',
                 'duration' => $setting->duration,
-                'method' => 'Elite Membership',
-                'status' => 'Approved',
-                'description' => 'Elite staking activated'
+                'received_days' => 0,
+                'status' => 1,
             ]);
 
             // Update user's elite club status
@@ -283,16 +282,14 @@ class EliteClubController extends Controller
                 'description' => 'Elite V2 membership purchased'
             ]);
 
-            EliteV2StakingHistory::create([
+            EliteStaking::create([
                 'user_id' => $user->id,
                 'amount' => $fee,
                 'daily_bonus' => $setting->daily_bonus,
                 'wallet' => 'MUSD',
-                'type' => 'Debit',
                 'duration' => $setting->duration,
-                'method' => 'Elite V2 Membership',
-                'status' => 'Approved',
-                'description' => 'Elite V2 staking activated'
+                'received_days' => 0,
+                'status' => 1,
             ]);
 
             $user->is_elite_v2 = 1;

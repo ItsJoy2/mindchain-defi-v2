@@ -5,10 +5,10 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\AmbassadorHistory;
 use App\Models\AngelStaking;
-use App\Models\AngelWalletHistory;
-use App\Models\EliteV2StakingHistory;
+use App\Models\EliteStaking;
 use App\Models\PurchaseStaking;
 use App\Models\Transaction;
+use App\Models\UsdtStakingHistory;
 use App\Models\User;
 use App\Models\WalletIcon;
 use Illuminate\Http\Request;
@@ -112,13 +112,13 @@ class DashboardController extends Controller
                     ],
 
                 'elite_club' => [
-                    'balance' => number_format(Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')), 2),
-                    'value'   => number_format(Transaction::where('user_id', $userId)->where('wallet', 'USDT')->where('method', 'Buy Elite Membership')->sum(DB::raw('ABS(amount)')) * $usdt_price, 2),
+                    'balance' => number_format(EliteStaking::where('user_id', $userId)->where('wallet', 'USDT')->sum(DB::raw('ABS(amount)')), 2),
+                    'value'   => number_format(EliteStaking::where('user_id', $userId)->where('wallet', 'USDT')->sum(DB::raw('ABS(amount)')) * $usdt_price, 2),
                     ],
 
                 'elite_Club_v2' =>[
-                    'balance' => number_format(EliteV2StakingHistory::where('user_id', $userId)->sum('amount'), 2),
-                    'value'   => number_format(EliteV2StakingHistory::where('user_id', $userId)->sum('amount') * $musd_price, 2),
+                    'balance' => number_format(EliteStaking::where('user_id', $userId)->where('wallet', 'MUSD')->sum('amount'), 2),
+                    'value'   => number_format(EliteStaking::where('user_id', $userId)->where('wallet', 'MUSD')->sum('amount') * $musd_price, 2),
                 ],
 
                 'mind_kids' => [
