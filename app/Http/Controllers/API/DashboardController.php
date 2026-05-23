@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\AmbassadorHistory;
 use App\Models\AngelStaking;
 use App\Models\EliteStaking;
+use App\Models\MkidsPurchaseHistory;
 use App\Models\PurchaseStaking;
 use App\Models\Transaction;
-use App\Models\UsdtStakingHistory;
 use App\Models\User;
 use App\Models\WalletIcon;
 use Illuminate\Http\Request;
@@ -122,8 +122,8 @@ class DashboardController extends Controller
                 ],
 
                 'mind_kids' => [
-                    'balance' => number_format(Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount'), 2),
-                    'value'   => number_format(Transaction::where('user_id', $userId)->where('method', 'Kids Program Membership')->sum('amount') * $mind_price, 2),
+                    'balance' => number_format(MkidsPurchaseHistory::where('user_id', $userId)->sum('amount'), 2),
+                    'value'   => number_format(MkidsPurchaseHistory::where('user_id', $userId)->sum('amount') * $mind_price, 2),
                 ],
 
             ];

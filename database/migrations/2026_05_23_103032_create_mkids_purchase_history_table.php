@@ -11,19 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('usdt_staking_histories', function (Blueprint $table) {
+        Schema::create('mkids_purchase_history', function (Blueprint $table) {
+
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->decimal('amount', 16, 8);
-            $table->double('daily_bonus', 8, 2)->default(0);
-            $table->enum('wallet', ['USDT', 'MIND', 'MUSD', 'BMIND'])->index();
+            $table->decimal('amount', 16, 2);
             $table->enum('type', ['Debit', 'Credit'])->index();
-            $table->integer('duration')->default(0);
-            $table->integer('received_days')->default(0);
             $table->string('method')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['Pending', 'Approved', 'Reject', 'Expired', 'Processing'])->default('Pending')->index();
             $table->timestamps();
+
         });
     }
 
@@ -32,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('usdt_staking_histories');
+        Schema::dropIfExists('mkids_purchase_history');
     }
 };

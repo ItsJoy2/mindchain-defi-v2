@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('method')->nullable();
             $table->text('description')->nullable();
             $table->string('txn_id')->unique()->nullable();
-            $table->string('kids_username')->nullable()->index();
             $table->string('confirmation_code')->nullable();
             $table->enum('status', ['Pending', 'Approved', 'Reject', 'Expired', 'Processing'])->default('Pending')->index();
             $table->timestamps();
