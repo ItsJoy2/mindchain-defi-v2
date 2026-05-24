@@ -216,6 +216,7 @@ class MkidsProgramController extends Controller
                     'kids_birth_place'  => $program->kids_birth_place,
                     'country'           => $program->country,
                     'count'             => $program->count,
+                    'token_bonus'       => number_format($setting->token_bonus, 2),
                 ]
             ]);
 
@@ -367,6 +368,7 @@ class MkidsProgramController extends Controller
                     'kids_birth_place'  => $program->kids_birth_place,
                     'country'           => $program->country,
                     'count'             => $program->count,
+                    'token_bonus'       => number_format($setting->token_bonus, 2),
                 ]
             ]);
 
