@@ -67,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('join-angel', [AngelClubController::class, 'joinAngel']);
 
     // MKIDS STAKING PROGRAM
+    Route::get('mkids', [MkidsProgramController::class, 'index']);
     Route::post('mkids/join-program', [MkidsProgramController::class, 'joinProgram']);
     Route::post('mkids/rejoin-program', [MkidsProgramController::class, 'rejoinProgram']);
 

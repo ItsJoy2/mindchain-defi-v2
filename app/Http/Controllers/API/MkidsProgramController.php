@@ -24,6 +24,55 @@ class MkidsProgramController extends Controller
         $this->walletService = $walletService;
     }
 
+    public function index()
+    {
+        try {
+
+            $user = Auth::user();
+
+            $setting = MkidsStakingSetting::where('status', 1)->first();
+
+            if (!$setting) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'MKIDS staking settings not found'
+                ], 404);
+            }
+
+            $usdtBalance = $this->walletService->getBalance($user->id, 'USDT');
+
+            $musdBalance = $this->walletService->getBalance($user->id, 'MUSD');
+
+
+            return response()->json([
+                'status' => true,
+                'message' => 'MKIDS staking data fetched successfully',
+
+                'data' => [
+
+                    'staking_amount' => number_format($setting->amount, 2),
+
+                    'token_bonus' => number_format($setting->token_bonus, 2),
+
+                    'wallet_balance' => [
+
+                        'USDT' => number_format($usdtBalance, 2),
+
+                        'MUSD' => number_format($musdBalance, 2),
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function joinProgram(Request $request)
     {
         DB::beginTransaction();
