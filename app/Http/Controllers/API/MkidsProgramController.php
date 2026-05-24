@@ -383,46 +383,68 @@ class MkidsProgramController extends Controller
         }
     }
 
-    public function kidsHistory()
-    {
-        try {
+public function kidsHistory(Request $request)
+{
+    try {
 
-            $user = Auth::user();
+        $user = auth()->user();
 
-            $programs = MkidsStakingProgram::where('user_id', $user->id)
-                ->latest()
-                ->get();
+        $perPage = (int) $request->get('per_page', 10);
 
-            $data = $programs->map(function ($program) {
+        $query = MkidsStakingProgram::where('user_id', $user->id);
+
+        $histories = $query
+            ->select([
+                'id',
+                'kids_name',
+                'kids_username',
+                'kids_father_name',
+                'kids_mother_name',
+                'dob',
+                'age',
+                'kids_birth_place',
+                'country',
+                'count',
+                'updated_at'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'MKIDS history retrieved successfully',
+
+            'data' => collect($histories->items())->map(function ($row) {
 
                 return [
-
-                    'id'                => $program->id,
-                    'kids_name'         => $program->kids_name,
-                    'kids_username'     => $program->kids_username,
-                    'kids_father_name'  => $program->kids_father_name,
-                    'kids_mother_name'  => $program->kids_mother_name,
-                    'dob'               => date('Y-m-d', strtotime($program->dob)),
-                    'age'               => $program->age,
-                    'kids_birth_place'  => $program->kids_birth_place,
-                    'country'           => $program->country,
-                    'rejoin_count'      => $program->count,
-                    'updated_at'        => $program->updated_at->format('Y-m-d h:i A'),
+                    'id'               => $row->id,
+                    'kids_name'        => $row->kids_name,
+                    'kids_username'    => $row->kids_username,
+                    'kids_father_name' => $row->kids_father_name,
+                    'kids_mother_name' => $row->kids_mother_name,
+                    'dob'              => date('Y-m-d', strtotime($row->dob)),
+                    'age'              => (int) $row->age,
+                    'kids_birth_place' => $row->kids_birth_place,
+                    'country'          => $row->country,
+                    'rejoin_count'     => (int) $row->count,
+                    'updated_at'       => $row->updated_at->format('d M Y'),
                 ];
-            });
+            }),
 
-            return response()->json([
-                'status' => true,
-                'message' => 'MKIDS history fetched successfully',
-                'data' => $data
-            ]);
+            'pagination' => [
+                'page'     => $histories->currentPage(),
+                'per_page' => $histories->perPage(),
+                'total'    => $histories->total(),
+            ]
 
-        } catch (\Exception $e) {
+        ]);
 
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
 }
