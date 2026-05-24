@@ -6,6 +6,7 @@ use App\Http\Controllers\API\BmindWalletController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EliteClubController;
 use App\Http\Controllers\API\MindWalletController;
+use App\Http\Controllers\API\MkidsProgramController;
 use App\Http\Controllers\API\MusdWalletController;
 use App\Http\Controllers\API\StakingHistoryController;
 use App\Http\Controllers\API\TransactionController;
@@ -64,6 +65,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // ANGEL CLUB
     Route::get('angel-club', [AngelClubController::class, 'index']);
     Route::post('join-angel', [AngelClubController::class, 'joinAngel']);
+
+    // MKIDS STAKING PROGRAM
+    Route::post('mkids/join-program', [MkidsProgramController::class, 'joinProgram']);
+    Route::post('mkids/rejoin-program', [MkidsProgramController::class, 'rejoinProgram']);
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });
