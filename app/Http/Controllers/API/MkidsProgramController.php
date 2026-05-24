@@ -380,4 +380,47 @@ class MkidsProgramController extends Controller
             ], 500);
         }
     }
+
+    public function kidsHistory()
+    {
+        try {
+
+            $user = Auth::user();
+
+            $programs = MkidsStakingProgram::where('user_id', $user->id)
+                ->latest()
+                ->get();
+
+            $data = $programs->map(function ($program) {
+
+                return [
+
+                    'id'                => $program->id,
+                    'kids_name'         => $program->kids_name,
+                    'kids_username'     => $program->kids_username,
+                    'kids_father_name'  => $program->kids_father_name,
+                    'kids_mother_name'  => $program->kids_mother_name,
+                    'dob'               => date('Y-m-d', strtotime($program->dob)),
+                    'age'               => $program->age,
+                    'kids_birth_place'  => $program->kids_birth_place,
+                    'country'           => $program->country,
+                    'rejoin_count'      => $program->count,
+                    'updated_at'        => $program->updated_at->format('Y-m-d h:i A'),
+                ];
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'MKIDS history fetched successfully',
+                'data' => $data
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
