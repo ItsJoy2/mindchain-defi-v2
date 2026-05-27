@@ -71,9 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('mkids/join-program', [MkidsProgramController::class, 'joinProgram']);
     Route::post('mkids/rejoin-program', [MkidsProgramController::class, 'rejoinProgram']);
     Route::get('mkids/history', [MkidsProgramController::class, 'kidsHistory']);
-    
+
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });
-
-

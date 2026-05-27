@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
 use App\Models\AngelSetting;
 use App\Models\AngelStaking;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Services\WalletService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class AngelClubController extends Controller
@@ -207,4 +207,5 @@ class AngelClubController extends Controller
             ], 500);
         }
     }
+
 }
