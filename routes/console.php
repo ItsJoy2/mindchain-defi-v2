@@ -10,23 +10,23 @@ Artisan::command('inspire', function () {
 
 
 // MIND STAKING
-// Schedule::command('mind:staking-daily')->dailyAt('00:10');
+Schedule::command('mind:staking-daily')->dailyAt('00:10');
 
 // ELITE BONUS
-// Schedule::command('elite:daily-bonus')->dailyAt('00:15');
+Schedule::command('elite:daily-bonus')->dailyAt('00:15');
 
 // ELITE V2 BONUS
-// Schedule::command('elitev2:daily-bonus')->dailyAt('00:20');
+Schedule::command('elitev2:daily-bonus')->dailyAt('00:20');
 
 // OTP EXPIRE CHECK
 Schedule::command('otp:expire')->everyMinute();
 
 
 // BMIND STAKING
-// Schedule::command('bmind:staking-daily')->dailyAt('00:05');
+Schedule::command('bmind:staking-daily')->dailyAt('00:05');
 
 // MUSD STAKING
-// Schedule::command('musd:staking-daily')->dailyAt('00:25');
+Schedule::command('musd:staking-daily')->dailyAt('00:25');
 
 // ANGEL BONUS
-// $schedule->command('angel:bonus')->dailyAt('00:30');
+Schedule::command('angel:daily-bonus')->dailyAt('00:30');

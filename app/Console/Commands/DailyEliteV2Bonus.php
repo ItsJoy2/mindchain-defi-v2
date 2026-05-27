@@ -18,7 +18,7 @@ class DailyEliteV2Bonus extends Command
     {
         try {
 
-            $stakings = EliteStaking::where('wallet', 'MUSD')->get();
+            $stakings = EliteStaking::where('wallet', 'MUSD')->where('status', 1)->get();
 
             if ($stakings->isEmpty()) {
 

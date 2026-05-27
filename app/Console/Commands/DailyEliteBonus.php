@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\EliteStaking;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 use App\Models\Transaction;
-use App\Models\UsdtStakingHistory;
 
 class DailyEliteBonus extends Command
 {
@@ -19,12 +19,11 @@ class DailyEliteBonus extends Command
     {
         try {
 
-            $stakings = UsdtStakingHistory::where('method', '!=', 'Angel Membership')->get();
+            $stakings = EliteStaking::where('wallet', 'USDT')->where('status', 1)->get();
 
             if ($stakings->isEmpty()) {
 
                 $this->info('No active staking found.');
-
                 return Command::SUCCESS;
             }
 
@@ -32,16 +31,12 @@ class DailyEliteBonus extends Command
 
                 DB::beginTransaction();
 
-                // staking created date
                 $createdAt = Carbon::parse($staking->created_at);
-
-                // today
                 $today = Carbon::now();
 
-                // total running days
                 $days = $createdAt->diffInDays($today);
 
-                // already received today check
+                // Already received today check
                 $alreadyReceivedToday = Transaction::where('user_id', $staking->user_id)
                     ->where('method', 'Daily Elite Bonus')
                     ->whereDate('created_at', Carbon::today())
@@ -50,16 +45,18 @@ class DailyEliteBonus extends Command
                 if ($alreadyReceivedToday) {
 
                     DB::commit();
-
                     continue;
                 }
 
+                // duration cross → switch to 15% APY
                 if ($days > $staking->duration) {
 
                     $staking->daily_bonus = ($staking->amount * 15) / (100 * $staking->duration);
+
+                    $staking->save();
                 }
 
-                // daily bonus send
+                // Daily bonus send
                 Transaction::create([
                     'user_id' => $staking->user_id,
                     'amount' => $staking->daily_bonus,
@@ -72,9 +69,6 @@ class DailyEliteBonus extends Command
 
                 // received days increment
                 $staking->increment('received_days');
-
-                // save updated bonus if changed
-                $staking->save();
 
                 DB::commit();
             }

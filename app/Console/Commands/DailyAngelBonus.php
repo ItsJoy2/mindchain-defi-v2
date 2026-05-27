@@ -2,91 +2,86 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\AngelStaking;
 use App\Models\Transaction;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class DailyAngelBonus extends Command
 {
-    /**
-     * The name and signature of the console command.
-     */
-    protected $signature = 'angel:bonus';
+    protected $signature = 'angel:daily-bonus';
 
-    /**
-     * The console command description.
-     */
-    protected $description = 'Distribute daily angel bonus';
+    protected $description = 'Distribute daily angel staking bonus';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         try {
 
-            DB::beginTransaction();
-
             $stakings = AngelStaking::where('status', 1)->get();
+
+            if ($stakings->isEmpty()) {
+
+                $this->info('No active staking found.');
+                return Command::SUCCESS;
+            }
 
             foreach ($stakings as $staking) {
 
-                /**
-                 * Unlimited Duration
-                 * duration = 0 means unlimited bonus
-                 */
-                if ($staking->duration == 0) {
+                DB::beginTransaction();
 
-                    Transaction::create([
-                        'user_id' => $staking->user_id,
-                        'amount' => number_format($staking->daily_bonus, 4),
-                        'wallet' => 'MUSD',
-                        'type' => 'Credit',
-                        'method' => 'Angel Daily Bonus',
-                        'status' => 'Approved',
-                        'description' => number_format($staking->daily_bonus, 2) . ' MUSD Daily Bonus from Angel Club'
-                    ]);
+                $createdAt = Carbon::parse($staking->created_at);
+                $today = Carbon::now();
 
+                $days = $createdAt->diffInDays($today);
+
+                // Already received today check
+                $alreadyReceivedToday = Transaction::where('user_id', $staking->user_id)
+                    ->where('method', 'Daily Angel Bonus')
+                    ->whereDate('created_at', Carbon::today())
+                    ->exists();
+
+                if ($alreadyReceivedToday) {
+
+                    DB::commit();
                     continue;
                 }
 
-                /**
-                 * Limited Duration
-                 */
-                if ($staking->received_days < $staking->duration) {
+                // duration cross → switch to 25% APY
+                if ($days > $staking->duration) {
 
-                    Transaction::create([
-                        'user_id' => $staking->user_id,
-                        'amount' => number_format($staking->daily_bonus, 4),
-                        'wallet' => 'MUSD',
-                        'type' => 'Credit',
-                        'method' => 'Angel Daily Bonus',
-                        'status' => 'Approved',
-                        'description' => number_format($staking->daily_bonus, 2) . ' MUSD Daily Bonus from Angel Club'
-                    ]);
-
-                    // Increase received days
-                    $staking->increment('received_days');
-
-                    // Complete staking
-                    if (($staking->received_days + 1) >= $staking->duration) {
-
-                        $staking->status = 0;
-                        $staking->save();
-                    }
+                    $staking->daily_bonus = ($staking->amount * 25) / (100 * $staking->duration);
+                    $staking->save();
                 }
+
+                // Daily bonus send
+                Transaction::create([
+                    'user_id' => $staking->user_id,
+                    'amount' => $staking->daily_bonus,
+                    'wallet' => 'MUSD',
+                    'type' => 'Credit',
+                    'method' => 'Daily Angel Bonus',
+                    'status' => 'Approved',
+                    'description' => $staking->daily_bonus . ' Daily Bonus for Angel Membership'
+                ]);
+
+                // received days increment
+                $staking->increment('received_days');
+
+                DB::commit();
             }
 
-            DB::commit();
+            $this->info('Daily angel bonus distributed successfully.');
 
-            $this->info('Daily angel bonus distributed successfully');
+            return Command::SUCCESS;
 
         } catch (\Exception $e) {
 
             DB::rollBack();
 
             $this->error($e->getMessage());
+
+            return Command::FAILURE;
         }
     }
 }
