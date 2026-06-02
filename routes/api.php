@@ -75,3 +75,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('transactions', [TransactionController::class, 'index']);
 });
+
