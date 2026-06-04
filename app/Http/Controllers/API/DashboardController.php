@@ -36,10 +36,18 @@ class DashboardController extends Controller
             });
 
             $icons = [
-                'MIND' => $walletIcons['MIND'] ?? null,
-                'BMIND' => $walletIcons['BMIND'] ?? null,
-                'MUSD' => $walletIcons['MUSD'] ?? null,
-                'USDT' => $walletIcons['USDT'] ?? null,
+                'MIND'       => $walletIcons['MIND'] ?? null,
+                'BMIND'      => $walletIcons['BMIND'] ?? null,
+                'MUSD'       => $walletIcons['MUSD'] ?? null,
+                'USDT'       => $walletIcons['USDT'] ?? null,
+
+                'MKIDS'      => $walletIcons['MKIDS'] ?? null,
+                'AMBASSADOR' => $walletIcons['AMBASSADOR'] ?? null,
+                'CONSULTANT' => $walletIcons['CONSULTANT'] ?? null,
+                'ELITE'      => $walletIcons['ELITE'] ?? null,
+                'ELITEV2'    => $walletIcons['ELITEV2'] ?? null,
+                'ANGEL'      => $walletIcons['ANGEL'] ?? null,
+                'MERCHANT'   => $walletIcons['MERCHANT'] ?? null,
             ];
 
             // Wallet Amounts
