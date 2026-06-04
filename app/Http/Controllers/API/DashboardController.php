@@ -40,7 +40,6 @@ class DashboardController extends Controller
                 'BMIND'      => $walletIcons['BMIND'] ?? null,
                 'MUSD'       => $walletIcons['MUSD'] ?? null,
                 'USDT'       => $walletIcons['USDT'] ?? null,
-
                 'MKIDS'      => $walletIcons['MKIDS'] ?? null,
                 'AMBASSADOR' => $walletIcons['AMBASSADOR'] ?? null,
                 'CONSULTANT' => $walletIcons['CONSULTANT'] ?? null,

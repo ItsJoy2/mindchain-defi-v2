@@ -354,7 +354,7 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-
+            $totalReferrals = $user->referrals()->count();
             $sponsor = null;
             if ($user->sponsor) {
                 if (!$user->sponsor->is_admin) {
@@ -394,6 +394,7 @@ class AuthController extends Controller
                     'elite_v2' => $user->is_elite_v2,
                     'angel_club' => $user->angel_club,
                     'email_verified' => $user->email_verified_at ? 'Verified' : 'Non Verified',
+                    'total_referrals' => $totalReferrals,
                 ]
             ]);
 
@@ -459,7 +460,7 @@ class AuthController extends Controller
                 // save path in database
                 $data['image'] = 'uploads/profile/' . $fileName;
             }
-            
+
             $user->update($data);
 
             $user->image = $user->image ? asset($user->image) : null;
