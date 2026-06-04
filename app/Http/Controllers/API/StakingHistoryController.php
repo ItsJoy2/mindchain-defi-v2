@@ -56,8 +56,9 @@ class StakingHistoryController extends Controller
                 (
                     $bmindSetting->days_180 +
                     $bmindSetting->days_365 +
-                    $bmindSetting->days_730
-                ) / 3,
+                    $bmindSetting->days_730 +
+                    $bmindSetting->days_1825
+                ) / 4,
                 2
             );
 
@@ -76,6 +77,11 @@ class StakingHistoryController extends Controller
                     'title' => '730 Days',
                     'days'  => 730,
                     'apy'   => number_format($bmindSetting->days_730, 2)
+                ],
+                [
+                    'title' => '1825 Days',
+                    'days'  => 1825,
+                    'apy'   => number_format($bmindSetting->days_1825, 2)
                 ],
             ];
 
