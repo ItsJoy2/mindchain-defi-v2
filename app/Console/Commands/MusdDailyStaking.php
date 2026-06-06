@@ -56,7 +56,7 @@ class MusdDailyStaking extends Command
 
                     if ($sponsor && $row->seller_bonus_rate > 0) {
 
-                        $sellerBonus = number_format($row->daily * ($row->seller_bonus_rate / 100), 2);
+                        $sellerBonus = number_format($row->daily * ($row->seller_bonus_rate / 100), 3);
 
                         Transaction::create([
                             'user_id'       => $sponsor->id,

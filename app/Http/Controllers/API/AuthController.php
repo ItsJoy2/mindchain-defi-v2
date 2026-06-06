@@ -355,6 +355,7 @@ class AuthController extends Controller
         try {
             $user = $request->user();
             $totalReferrals = $user->referrals()->count();
+
             $sponsor = null;
             if ($user->sponsor) {
                 if (!$user->sponsor->is_admin) {
