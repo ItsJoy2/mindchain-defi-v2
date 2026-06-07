@@ -210,34 +210,62 @@ class MindWalletController extends Controller
 
 
             // Level Bonus
-            $g_set = LevelSetting::first();
+            // $g_set = LevelSetting::first();
 
-            if ($g_set && $g_set->status == 1 && $sponsor) {
+            // if ($g_set && $g_set->status == 1 && $sponsor) {
 
-                $current = $sponsor;
+            //     $current = $sponsor;
 
-                for ($i = 1; $i <= 5; $i++) {
+            //     for ($i = 1; $i <= 5; $i++) {
 
-                    if (!$current) {
-                        break;
-                    }
+            //         if (!$current) {
+            //             break;
+            //         }
 
-                    $rate = $g_set->{'lvl_' . $i};
+            //         $rate = $g_set->{'lvl_' . $i};
 
-                    if ($current->ambassador == 1) {
+            //         if ($current->ambassador == 1) {
+
+            //             Transaction::create([
+            //                 'user_id' => $current->id,
+            //                 'wallet' => 'MIND',
+            //                 'amount' => ($amount * $rate) / 100,
+            //                 'method' => 'Level Bonus',
+            //                 'type' => 'Credit',
+            //                 'status' => 'Approved',
+            //                 'description' => "Level {$i} bonus from {$user->user_name}"
+            //             ]);
+            //         }
+
+            //         $current = User::find($current->sponsor);
+            //     }
+            // }
+
+            // Level 2 Bonus
+            if ($user->sponsor_id) {
+
+                $level1 = User::find($user->sponsor_id);
+
+                if ($level1 && $level1->sponsor_id) {
+
+                    $level2 = User::find($level1->sponsor_id);
+
+                    if (
+                        $level2 &&
+                        $level2->ambassador == 1 &&
+                        $staking->level_2 > 0
+                    ) {
 
                         Transaction::create([
-                            'user_id' => $current->id,
+                            'user_id' => $level2->id,
                             'wallet' => 'MIND',
-                            'amount' => ($amount * $rate) / 100,
-                            'method' => 'Level Bonus',
+                            'amount' => ($amount * $staking->level_2) / 100,
+                            'method' => 'Level 2 Bonus',
                             'type' => 'Credit',
                             'status' => 'Approved',
-                            'description' => "Level {$i} bonus from {$user->user_name}"
+                            'description' => 'Level 2 bonus from ' . $user->user_name
                         ]);
                     }
-
-                    $current = User::find($current->sponsor);
                 }
             }
 
@@ -457,32 +485,61 @@ class MindWalletController extends Controller
             }
 
             //  LEVEL BONUS
-            $g_set = LevelSetting::first();
+            // $g_set = LevelSetting::first();
 
-            if ($g_set && $g_set->status == 1 && $sponsor) {
+            // if ($g_set && $g_set->status == 1 && $sponsor) {
 
-                $current = $sponsor;
+            //     $current = $sponsor;
 
-                for ($i = 1; $i <= 5; $i++) {
+            //     for ($i = 1; $i <= 5; $i++) {
 
-                    if (!$current) break;
+            //         if (!$current) break;
 
-                    $rate = $g_set->{'lvl_' . $i};
+            //         $rate = $g_set->{'lvl_' . $i};
 
-                    if ($current->ambassador == 1) {
+            //         if ($current->ambassador == 1) {
+
+            //             Transaction::create([
+            //                 'user_id' => $current->id,
+            //                 'wallet' => 'MIND',
+            //                 'amount' => ($amount * $rate) / 100,
+            //                 'method' => 'Level Bonus',
+            //                 'type' => 'Credit',
+            //                 'status' => 'Approved',
+            //                 'description' => "Level {$i} bonus from {$receiver->user_name}"
+            //             ]);
+            //         }
+
+            //         $current = User::find($current->sponsor);
+            //     }
+            // }
+
+
+            // Level 2 Bonus
+            if ($user->sponsor_id) {
+
+                $level1 = User::find($user->sponsor_id);
+
+                if ($level1 && $level1->sponsor_id) {
+
+                    $level2 = User::find($level1->sponsor_id);
+
+                    if (
+                        $level2 &&
+                        $level2->ambassador == 1 &&
+                        $staking->level_2 > 0
+                    ) {
 
                         Transaction::create([
-                            'user_id' => $current->id,
+                            'user_id' => $level2->id,
                             'wallet' => 'MIND',
-                            'amount' => ($amount * $rate) / 100,
-                            'method' => 'Level Bonus',
+                            'amount' => ($amount * $staking->level_2) / 100,
+                            'method' => 'Level 2 Bonus',
                             'type' => 'Credit',
                             'status' => 'Approved',
-                            'description' => "Level {$i} bonus from {$receiver->user_name}"
+                            'description' => 'Level 2 bonus from ' . $user->user_name
                         ]);
                     }
-
-                    $current = User::find($current->sponsor);
                 }
             }
 
