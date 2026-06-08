@@ -516,9 +516,9 @@ class MindWalletController extends Controller
 
 
             // Level 2 Bonus
-            if ($user->sponsor_id) {
+            if ($receiver->sponsor_id) {
 
-                $level1 = User::find($user->sponsor_id);
+                $level1 = User::find($receiver->sponsor_id);
 
                 if ($level1 && $level1->sponsor_id) {
 
@@ -537,7 +537,7 @@ class MindWalletController extends Controller
                             'method' => 'Level 2 Bonus',
                             'type' => 'Credit',
                             'status' => 'Approved',
-                            'description' => 'Level 2 bonus from ' . $user->user_name
+                            'description' => 'Level 2 bonus from ' . $receiver->user_name
                         ]);
                     }
                 }
