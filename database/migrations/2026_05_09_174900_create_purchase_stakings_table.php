@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('purchase_stakings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->index();
-            $table->enum('wallet', ['MIND', 'MUSD', 'BMIND', 'USDT'])->default('MIND')->after('user_id');
+            $table->enum('wallet', ['MIND', 'MUSD', 'BMIND', 'USDT'])->default('MIND');
             $table->decimal('amount', 18, 8);
             $table->integer('duration');
             $table->integer('received_days')->default(0);

@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AngelClubController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BmindWalletController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\DepositController;
 use App\Http\Controllers\API\EliteClubController;
 use App\Http\Controllers\API\MindWalletController;
 use App\Http\Controllers\API\MkidsProgramController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\API\MusdWalletController;
 use App\Http\Controllers\API\StakingHistoryController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\TransferController;
+use App\Http\Controllers\API\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -74,5 +76,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('transactions', [TransactionController::class, 'index']);
+
+
+    Route::post('deposit/create', [DepositController::class, 'createDeposit']);
 });
 
+Route::post('check-deposit', [WebhookController::class, 'handle']);
