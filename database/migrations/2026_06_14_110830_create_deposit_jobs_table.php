@@ -9,26 +9,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('deposit_jobs', function (Blueprint $table) {
+
             $table->id();
-
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-
             $table->string('invoice_id')->unique();
-
             $table->decimal('amount', 28, 8);
-
             $table->string('wallet');
-
+            $table->unsignedBigInteger('chain_id')->nullable();
+            $table->string('type')->nullable();
+            $table->string('contract_address')->nullable();
             $table->string('wallet_address')->nullable();
-
             $table->string('tx_hash')->nullable();
-
-            $table->enum('status', [
-                'pending',
-                'paid',
-                'failed',
-                'cancelled'
-            ])->default('pending');
+            $table->enum('status', ['Pending','Completed','Expired','Cancelled'
+            ])->default('Pending');
 
             $table->json('gateway_response')->nullable();
 

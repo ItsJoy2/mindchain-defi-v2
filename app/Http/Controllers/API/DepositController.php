@@ -105,11 +105,14 @@ class DepositController extends Controller
             }
 
             $depositJob = DepositJob::create([
-                'user_id' => $user->id,
-                'invoice_id' => $result['data']['invoice_id'],
-                'amount' => $request->amount,
-                'wallet' => $request->wallet,
-                'wallet_address' => $result['data']['address'],
+                'user_id'          => $user->id,
+                'invoice_id'       => $result['data']['invoice_id'],
+                'amount'           => $request->amount,
+                'wallet'           => $request->wallet,
+                'chain_id'         => $wallets[$request->wallet]['chain_id'],
+                'type'             => $wallets[$request->wallet]['type'],
+                'contract_address' => $wallets[$request->wallet]['contract_address'] ?? null,
+                'wallet_address'   => $result['data']['address'],
                 'gateway_response' => $result['data'],
             ]);
 
@@ -117,11 +120,11 @@ class DepositController extends Controller
                 'status' => true,
                 'message' => 'Invoice created successfully',
                 'data' => [
-                    'invoice_id' => $depositJob->invoice_id,
                     'address' => $depositJob->wallet_address,
                     'amount' => $depositJob->amount,
-                    'token' => $depositJob->wallet,
-                    'status' => $depositJob->status
+                    'wallet' => $depositJob->wallet,
+                    'status' => $depositJob->status,
+                    'created_at' => $depositJob->created_at->toDateTimeString()
                 ]
             ]);
 

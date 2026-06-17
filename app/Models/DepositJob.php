@@ -11,16 +11,21 @@ class DepositJob extends Model
         'invoice_id',
         'amount',
         'wallet',
+        'chain_id',
+        'type',
+        'contract_address',
         'wallet_address',
         'tx_hash',
         'status',
         'gateway_response',
-        'paid_at'
+        'paid_at',
     ];
 
     protected $casts = [
+        'amount' => 'decimal:8',
+        'chain_id' => 'integer',
         'gateway_response' => 'array',
-        'paid_at' => 'datetime'
+        'paid_at' => 'datetime',
     ];
 
     public function user()
