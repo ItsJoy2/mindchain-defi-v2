@@ -120,7 +120,7 @@ class CheckDeposit extends Command
                 Transaction::create([
                     'user_id'     => $deposit->user_id,
                     'wallet_type' => strtoupper($deposit->wallet),
-                    'amount'      => $amount, // API response এর balance direct save হবে
+                    'amount'      => $amount, 
                     'type'        => 'Credit',
                     'method'      => 'Deposit',
                     'trx_id'      => $deposit->invoice_id,
