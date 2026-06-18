@@ -158,7 +158,7 @@ class WebhookController extends Controller
             */
 
             $exists = Transaction::where(
-                'trx_id',
+                'txn_id',
                 $deposit->invoice_id
             )->lockForUpdate()->exists();
 

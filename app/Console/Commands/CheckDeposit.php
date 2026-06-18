@@ -134,7 +134,7 @@ class CheckDeposit extends Command
                 |--------------------------------------------------------------------------
                 */
 
-                $exists = Transaction::where('trx_id', $deposit->invoice_id)->exists();
+                $exists = Transaction::where('txn_id', $deposit->invoice_id)->exists();
 
                 if (!$exists) {
 
