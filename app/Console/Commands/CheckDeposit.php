@@ -144,7 +144,7 @@ class CheckDeposit extends Command
                         'amount'      => $amount,
                         'type'        => 'Credit',
                         'method'      => 'Deposit',
-                        'trx_id'      => $deposit->invoice_id,
+                        'txn_id'      => $deposit->invoice_id,
                         'description' => $amount . ' ' . strtoupper($deposit->wallet) . ' deposit via gateway',
                         'status'      => 'Approved',
                     ]);

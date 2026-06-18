@@ -191,7 +191,7 @@ class WebhookController extends Controller
                 'amount'      => $amount,
                 'type'        => 'Credit',
                 'method'      => 'Deposit',
-                'trx_id'      => $deposit->invoice_id,
+                'txn_id'      => $deposit->invoice_id,
                 'description' => $amount . ' '
                     . strtoupper($deposit->wallet)
                     . ' deposited via payment gateway',
