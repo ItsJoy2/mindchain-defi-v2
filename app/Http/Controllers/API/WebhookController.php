@@ -185,18 +185,18 @@ class WebhookController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            // Transaction::create([
-            //     'user_id'     => $deposit->user_id,
-            //     'wallet_type' => strtoupper($deposit->wallet),
-            //     'amount'      => $amount,
-            //     'type'        => 'Credit',
-            //     'method'      => 'Deposit',
-            //     'trx_id'      => $deposit->invoice_id,
-            //     'description' => $amount . ' '
-            //         . strtoupper($deposit->wallet)
-            //         . ' deposited via payment gateway',
-            //     'status'      => 'Approved',
-            // ]);
+            Transaction::create([
+                'user_id'     => $deposit->user_id,
+                'wallet_type' => strtoupper($deposit->wallet),
+                'amount'      => $amount,
+                'type'        => 'Credit',
+                'method'      => 'Deposit',
+                'trx_id'      => $deposit->invoice_id,
+                'description' => $amount . ' '
+                    . strtoupper($deposit->wallet)
+                    . ' deposited via payment gateway',
+                'status'      => 'Approved',
+            ]);
 
 
             // Credit User Wallet

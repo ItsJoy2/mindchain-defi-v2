@@ -7,7 +7,6 @@ use App\Models\Transaction;
 use App\Services\PaymentGatewayService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 
 class CheckDeposit extends Command
 {
@@ -58,14 +57,14 @@ class CheckDeposit extends Command
                     'invoice_id' => $deposit->invoice_id
                 ];
 
-
-            $paymentResponse = Http::timeout(200)
-                ->acceptJson()
-                ->get(
+                $paymentResponse = PaymentGatewayService::client(
+                    $paymentPayload
+                )->get(
                     config('payment_gateway.api_url')
                     . '/api/payments/'
                     . $deposit->invoice_id
                 );
+
                 if (!$paymentResponse->successful()) {
                     throw new \Exception(
                         'Payment status check failed'
@@ -121,66 +120,36 @@ class CheckDeposit extends Command
                             = $deposit->contract_address;
                     }
 
-                    $balanceResponse = Http::timeout(20)
-                        ->acceptJson()
-                        ->get(
-                            config('payment_gateway.api_url')
-                            . '/api/check-balance',
-                            $balancePayload
-                        );
+                    $balanceResponse = PaymentGatewayService::client(
+                        $balancePayload
+                    )->get(
+                        config('payment_gateway.api_url')
+                        . '/api/check-balance',
+                        $balancePayload
+                    );
 
                     if (!$balanceResponse->successful()) {
                         throw new \Exception(
-                            'Balance check failed. Response: ' .
-                            $balanceResponse->body()
+                            'Balance check failed'
                         );
                     }
 
-                    // JSON response হলে
-                    if (
-                        str_contains(
-                            strtolower($balanceResponse->header('content-type') ?? ''),
-                            'application/json'
-                        )
-                    ) {
-
-                        $balanceData = $balanceResponse->json();
-
-                        $amount = (float) (
-                            $balanceData['balance']
-                            ?? $balanceData['amount']
-                            ?? 0
-                        );
-
-                    } else {
-
-                        // Plain text response হলে
-                        $amount = (float) trim(
-                            $balanceResponse->body()
-                        );
-                    }
+                    $amount = (float) trim(
+                        $balanceResponse->body()
+                    );
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Skip only when exact balance is zero
-                |--------------------------------------------------------------------------
-                */
-
-                if ($amount == 0) {
+                if ($amount <= 0) {
 
                     DB::commit();
 
                     $this->line(
-                        "Invoice {$deposit->invoice_id} balance is zero"
+                        "Invoice {$deposit->invoice_id} amount is zero"
                     );
 
                     continue;
                 }
 
-                $this->info(
-                    "Invoice {$deposit->invoice_id} Amount Found: {$amount}"
-                );
                 /*
                 |--------------------------------------------------------------------------
                 | Duplicate Transaction Check
