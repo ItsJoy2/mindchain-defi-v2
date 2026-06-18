@@ -6,13 +6,17 @@ use Illuminate\Support\Facades\Http;
 
 class PaymentGatewayService
 {
-    public static function generateSignature(array $payload = []): array
+    public static function generateSignature(?array $payload = null): array
     {
         $timestamp = time();
 
+        $message = empty($payload)
+            ? $timestamp . config('payment_gateway.license_key')
+            : $timestamp . json_encode($payload);
+
         $signature = hash_hmac(
             'sha256',
-            $timestamp . json_encode($payload),
+            $message,
             config('payment_gateway.secret')
         );
 
@@ -22,7 +26,7 @@ class PaymentGatewayService
         ];
     }
 
-    public static function headers(array $payload = []): array
+    public static function headers(?array $payload = null): array
     {
         $auth = self::generateSignature($payload);
 
@@ -30,12 +34,13 @@ class PaymentGatewayService
             'X-LICENSE-KEY' => config('payment_gateway.license_key'),
             'X-TIMESTAMP'   => $auth['timestamp'],
             'X-SIGNATURE'   => $auth['signature'],
+            'Accept'        => 'application/json',
         ];
     }
 
-    public static function client(array $payload = [])
+    public static function client(?array $payload = null)
     {
-        return Http::timeout(20)
+        return Http::timeout(300)
             ->withHeaders(
                 self::headers($payload)
             );

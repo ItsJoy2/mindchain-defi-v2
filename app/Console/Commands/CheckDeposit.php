@@ -53,9 +53,7 @@ class CheckDeposit extends Command
                 |--------------------------------------------------------------------------
                 */
 
-                $response = PaymentGatewayService::client([
-                    'invoice_id' => $deposit->invoice_id
-                ])->get(
+                $response = PaymentGatewayService::client()->get(
                     config('payment_gateway.api_url')
                     . '/api/payments/'
                     . $deposit->invoice_id
