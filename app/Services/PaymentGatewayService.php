@@ -53,7 +53,7 @@ class PaymentGatewayService
      */
     public static function client()
     {
-        return Http::timeout(60)
+        return Http::timeout(50)
             ->retry(2, 100)
             ->withHeaders(self::headers());
     }
