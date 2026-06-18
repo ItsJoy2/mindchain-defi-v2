@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\DepositJob;
+use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -75,21 +76,9 @@ class DepositController extends Controller
                 $wallets[$request->wallet]
             );
 
-            $payload = json_encode($gatewayData);
-
-            $timestamp = time();
-
-            $signature = hash_hmac(
-                'sha256',
-                $timestamp . $payload,
-                config('payment_gateway.secret')
-            );
-
-            $response = Http::withHeaders([
-                'X-LICENSE-KEY' => config('payment_gateway.license_key'),
-                'X-TIMESTAMP' => $timestamp,
-                'X-SIGNATURE' => $signature,
-            ])->post(
+            $response = PaymentGatewayService::client(
+                $gatewayData
+            )->post(
                 config('payment_gateway.api_url') . '/api/create_invoice',
                 $gatewayData
             );
