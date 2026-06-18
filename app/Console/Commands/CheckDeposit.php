@@ -47,133 +47,123 @@ class CheckDeposit extends Command
                     continue;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Payment Status Check
-                |--------------------------------------------------------------------------
-                */
+            /*
+            |--------------------------------------------------------------------------
+            | Payment Status Check
+            |--------------------------------------------------------------------------
+            */
 
-                $payload = [
-                    'invoice_id' => $deposit->invoice_id
-                ];
+            $paymentResponse = PaymentGatewayService::client([
+                'invoice_id' => $deposit->invoice_id
+            ])->get(
+                config('payment_gateway.api_url')
+                . '/api/payments/'
+                . $deposit->invoice_id
+            );
 
-                $paymentResponse = PaymentGatewayService::client(
-                    $payload
-                )->get(
-                    config('payment_gateway.api_url')
-                    . '/api/payments/'
-                    . $deposit->invoice_id
+            if (!$paymentResponse->successful()) {
+                throw new \Exception(
+                    'Payment status check failed. HTTP: ' .
+                    $paymentResponse->status()
                 );
+            }
 
-                if (!$paymentResponse->successful()) {
+            $paymentData = $paymentResponse->json();
 
-                    throw new \Exception(
-                        'Payment status check failed. HTTP: '
-                        . $paymentResponse->status()
-                    );
-                }
+            $paymentStatus = strtolower(
+                $paymentData['payment_status'] ?? 'pending'
+            );
 
-                $paymentData = $paymentResponse->json();
-
-                $paymentStatus = strtolower(
-                    $paymentData['payment_status']
-                    ?? $paymentData['status']
-                    ?? 'pending'
-                );
-
-                if ($paymentStatus !== 'completed') {
-
-                    DB::commit();
-
-                    $this->line(
-                        "Invoice {$deposit->invoice_id} still pending"
-                    );
-
-                    continue;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Amount From Payment API
-                |--------------------------------------------------------------------------
-                */
-
-                $amount = (float) (
-                    $paymentData['received_amount']
-                    ?? $paymentData['balance']
-                    ?? $paymentData['amount']
-                    ?? 0
-                );
-
-                if ($amount <= 0) {
-
-                    throw new \Exception(
-                        'Amount not found in payment response'
-                    );
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Duplicate Transaction Check
-                |--------------------------------------------------------------------------
-                */
-
-                $exists = Transaction::where(
-                    'trx_id',
-                    $deposit->invoice_id
-                )->lockForUpdate()->exists();
-
-                if (!$exists) {
-
-                    Transaction::create([
-                        'user_id'     => $deposit->user_id,
-                        'wallet_type' => strtoupper($deposit->wallet),
-                        'amount'      => $amount,
-                        'type'        => 'Credit',
-                        'method'      => 'Deposit',
-                        'trx_id'      => $deposit->invoice_id,
-                        'description' => $amount . ' ' .
-                            strtoupper($deposit->wallet) .
-                            ' deposited via payment gateway',
-                        'status'      => 'Approved',
-                    ]);
-
-                    $user = $deposit->user;
-
-                    if ($user) {
-
-                        $wallet = strtolower(
-                            $deposit->wallet
-                        );
-
-                        if (isset($user->{$wallet})) {
-
-                            $user->increment(
-                                $wallet,
-                                $amount
-                            );
-                        }
-                    }
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Complete Deposit
-                |--------------------------------------------------------------------------
-                */
-
-                $deposit->update([
-                    'status'           => 'Completed',
-                    'paid_at'          => now(),
-                    'tx_hash'          => $paymentData['tx_hash'] ?? null,
-                    'gateway_response' => $paymentData,
-                ]);
+            if ($paymentStatus !== 'completed') {
 
                 DB::commit();
 
-                $this->info(
-                    "Deposit Completed : {$deposit->invoice_id} | Amount : {$amount}"
+                $this->line(
+                    "Invoice {$deposit->invoice_id} still pending"
                 );
+
+                continue;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Amount From Payment API Balance
+            |--------------------------------------------------------------------------
+            */
+
+            $amount = $paymentData['balance'] ?? '0';
+
+            if ((float) $amount <= 0) {
+
+                DB::commit();
+
+                $this->line(
+                    "Invoice {$deposit->invoice_id} balance is zero"
+                );
+
+                continue;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Duplicate Transaction Check
+            |--------------------------------------------------------------------------
+            */
+
+            $exists = Transaction::where(
+                'trx_id',
+                $deposit->invoice_id
+            )->lockForUpdate()->exists();
+
+            if (!$exists) {
+
+                Transaction::create([
+                    'user_id'     => $deposit->user_id,
+                    'wallet_type' => strtoupper($deposit->wallet),
+                    'amount'      => $amount, // API response এর balance direct save হবে
+                    'type'        => 'Credit',
+                    'method'      => 'Deposit',
+                    'trx_id'      => $deposit->invoice_id,
+                    'description' => $amount . ' ' .
+                        strtoupper($deposit->wallet) .
+                        ' deposited via payment gateway',
+                    'status'      => 'Approved',
+                ]);
+
+                $user = $deposit->user;
+
+                if ($user) {
+
+                    $wallet = strtolower($deposit->wallet);
+
+                    if (isset($user->{$wallet})) {
+
+                        $user->increment(
+                            $wallet,
+                            (float) $amount
+                        );
+                    }
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Complete Deposit
+            |--------------------------------------------------------------------------
+            */
+
+            $deposit->update([
+                'status'           => 'Completed',
+                'paid_at'          => now(),
+                'tx_hash'          => $paymentData['tx_hash'] ?? null,
+                'gateway_response' => $paymentData,
+            ]);
+
+            DB::commit();
+
+            $this->info(
+                "Deposit Completed : {$deposit->invoice_id} | Amount : {$amount}"
+            );
 
             } catch (\Throwable $e) {
 
