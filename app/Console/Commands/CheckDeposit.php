@@ -59,7 +59,7 @@ class CheckDeposit extends Command
                 ];
 
 
-            $paymentResponse = Http::timeout(20)
+            $paymentResponse = Http::timeout(200)
                 ->acceptJson()
                 ->get(
                     config('payment_gateway.api_url')
