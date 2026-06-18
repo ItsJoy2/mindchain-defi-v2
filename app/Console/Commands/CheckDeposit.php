@@ -12,7 +12,7 @@ class CheckDeposit extends Command
 {
     protected $signature = 'deposit:check';
 
-    protected $description = 'Check pending deposits and update balance';
+    protected $description = 'Check pending deposits and credit user wallets';
 
     public function handle()
     {
@@ -53,12 +53,12 @@ class CheckDeposit extends Command
                 |--------------------------------------------------------------------------
                 */
 
-                $paymentPayload = [
+                $payload = [
                     'invoice_id' => $deposit->invoice_id
                 ];
 
                 $paymentResponse = PaymentGatewayService::client(
-                    $paymentPayload
+                    $payload
                 )->get(
                     config('payment_gateway.api_url')
                     . '/api/payments/'
@@ -66,8 +66,10 @@ class CheckDeposit extends Command
                 );
 
                 if (!$paymentResponse->successful()) {
+
                     throw new \Exception(
-                        'Payment status check failed'
+                        'Payment status check failed. HTTP: '
+                        . $paymentResponse->status()
                     );
                 }
 
@@ -75,6 +77,7 @@ class CheckDeposit extends Command
 
                 $paymentStatus = strtolower(
                     $paymentData['payment_status']
+                    ?? $paymentData['status']
                     ?? 'pending'
                 );
 
@@ -91,63 +94,22 @@ class CheckDeposit extends Command
 
                 /*
                 |--------------------------------------------------------------------------
-                | Amount
+                | Amount From Payment API
                 |--------------------------------------------------------------------------
                 */
 
                 $amount = (float) (
                     $paymentData['received_amount']
+                    ?? $paymentData['balance']
                     ?? $paymentData['amount']
                     ?? 0
                 );
 
-                /*
-                |--------------------------------------------------------------------------
-                | Fallback Balance Check
-                |--------------------------------------------------------------------------
-                */
-
                 if ($amount <= 0) {
 
-                    $balancePayload = [
-                        'chain_id' => $deposit->chain_id,
-                        'type'     => $deposit->type,
-                        'address'  => $deposit->wallet_address,
-                    ];
-
-                    if (!empty($deposit->contract_address)) {
-                        $balancePayload['contract_address']
-                            = $deposit->contract_address;
-                    }
-
-                    $balanceResponse = PaymentGatewayService::client(
-                        $balancePayload
-                    )->get(
-                        config('payment_gateway.api_url')
-                        . '/api/check-balance',
-                        $balancePayload
+                    throw new \Exception(
+                        'Amount not found in payment response'
                     );
-
-                    if (!$balanceResponse->successful()) {
-                        throw new \Exception(
-                            'Balance check failed'
-                        );
-                    }
-
-                    $amount = (float) trim(
-                        $balanceResponse->body()
-                    );
-                }
-
-                if ($amount <= 0) {
-
-                    DB::commit();
-
-                    $this->line(
-                        "Invoice {$deposit->invoice_id} amount is zero"
-                    );
-
-                    continue;
                 }
 
                 /*
@@ -159,9 +121,7 @@ class CheckDeposit extends Command
                 $exists = Transaction::where(
                     'trx_id',
                     $deposit->invoice_id
-                )
-                ->lockForUpdate()
-                ->exists();
+                )->lockForUpdate()->exists();
 
                 if (!$exists) {
 
@@ -182,14 +142,12 @@ class CheckDeposit extends Command
 
                     if ($user) {
 
-                        $wallet = strtolower($deposit->wallet);
+                        $wallet = strtolower(
+                            $deposit->wallet
+                        );
 
-                        if (
-                            in_array(
-                                $wallet,
-                                ['mind', 'musd', 'usdt', 'bmind']
-                            )
-                        ) {
+                        if (isset($user->{$wallet})) {
+
                             $user->increment(
                                 $wallet,
                                 $amount
@@ -214,7 +172,7 @@ class CheckDeposit extends Command
                 DB::commit();
 
                 $this->info(
-                    "Deposit Completed : {$deposit->invoice_id}"
+                    "Deposit Completed : {$deposit->invoice_id} | Amount : {$amount}"
                 );
 
             } catch (\Throwable $e) {
