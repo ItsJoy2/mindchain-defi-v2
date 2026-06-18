@@ -69,7 +69,7 @@ class DepositController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | PAYMENT GATEWAY REQUEST (FIXED)
+            | PAYMENT GATEWAY REQUEST
             |--------------------------------------------------------------------------
             */
 
@@ -134,6 +134,50 @@ class DepositController extends Controller
                 'status' => false,
                 'message' => $e->getMessage()
             ]);
+        }
+    }
+
+    public function statusShow($invoiceId)
+    {
+        if (!$invoiceId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invoice ID is required',
+                'data' => null
+            ], 422);
+        }
+
+        try {
+
+            $response = PaymentGatewayService::client()
+                ->get(config('payment_gateway.api_url')
+                . '/api/payments/' . $invoiceId);
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Gateway request failed',
+                    'data' => null
+                ], $response->status());
+            }
+
+            $res = $response->json();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Payment status fetched successfully',
+                'data' => [
+                    'payment_status' => strtolower($res['payment_status'] ?? 'pending'),
+                ]
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], 500);
         }
     }
 }
