@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class CheckDeposit extends Command
 {
     protected $signature = 'deposit:check';
-    protected $description = 'Check pending deposits and credit transactions';
+    protected $description = 'Check pending deposits and process transactions';
 
     public function handle()
     {
@@ -43,16 +43,14 @@ class CheckDeposit extends Command
 
                 /*
                 |--------------------------------------------------------------------------
-                | PAYMENT API CALL (NEW SIGNATURE SYSTEM)
+                | PAYMENT API CALL
                 |--------------------------------------------------------------------------
                 */
 
                 $paymentResponse = PaymentGatewayService::client()
-                    ->get(
-                        config('payment_gateway.api_url')
-                        . '/api/payments/'
-                        . $deposit->invoice_id
-                    );
+                    ->get(config('payment_gateway.api_url')
+                    . '/api/payments/'
+                    . $deposit->invoice_id);
 
                 if (!$paymentResponse->successful()) {
                     throw new \Exception(
@@ -66,7 +64,7 @@ class CheckDeposit extends Command
 
                 /*
                 |--------------------------------------------------------------------------
-                | IF EXPIRED -> mark expired
+                | EXPIRED CASE
                 |--------------------------------------------------------------------------
                 */
 
@@ -79,13 +77,12 @@ class CheckDeposit extends Command
                     DB::commit();
 
                     $this->line("Invoice {$deposit->invoice_id} expired");
-
                     continue;
                 }
 
                 /*
                 |--------------------------------------------------------------------------
-                | IF NOT COMPLETED -> skip
+                | NOT COMPLETED
                 |--------------------------------------------------------------------------
                 */
 
@@ -94,13 +91,12 @@ class CheckDeposit extends Command
                     DB::commit();
 
                     $this->line("Invoice {$deposit->invoice_id} still pending");
-
                     continue;
                 }
 
                 /*
                 |--------------------------------------------------------------------------
-                | AMOUNT (IMPORTANT: NEVER IGNORE SMALL VALUES)
+                | BALANCE
                 |--------------------------------------------------------------------------
                 */
 
@@ -113,8 +109,8 @@ class CheckDeposit extends Command
 
                 /*
                 |--------------------------------------------------------------------------
-                | IMPORTANT FIX:
-                | DO NOT reject small values like 0.0001
+                | IMPORTANT RULE:
+                | NEVER REJECT ZERO OR SMALL FLOAT LOGIC WRONG
                 |--------------------------------------------------------------------------
                 */
 
@@ -122,15 +118,30 @@ class CheckDeposit extends Command
                     $amount = 0;
                 }
 
-                if ($amount <= 0) {
+                /*
+                |--------------------------------------------------------------------------
+                | CASE 1: balance = 0 => only complete deposit
+                |--------------------------------------------------------------------------
+                */
+
+                if ($amount == 0) {
+
+                    $deposit->update([
+                        'status'           => 'Completed',
+                        'paid_at'          => now(),
+                        'tx_hash'          => $paymentData['tx_hash'] ?? null,
+                        'gateway_response' => $paymentData,
+                    ]);
+
                     DB::commit();
-                    $this->line("Invoice {$deposit->invoice_id} no balance found");
+
+                    $this->line("Invoice {$deposit->invoice_id} completed (0 balance)");
                     continue;
                 }
 
                 /*
                 |--------------------------------------------------------------------------
-                | DUPLICATE CHECK
+                | CASE 2: balance > 0 => transaction create
                 |--------------------------------------------------------------------------
                 */
 
@@ -149,12 +160,6 @@ class CheckDeposit extends Command
                         'status'      => 'Approved',
                     ]);
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | UPDATE DEPOSIT
-                |--------------------------------------------------------------------------
-                */
 
                 $deposit->update([
                     'status'           => 'Completed',
