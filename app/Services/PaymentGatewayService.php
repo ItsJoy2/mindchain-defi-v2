@@ -6,13 +6,19 @@ use Illuminate\Support\Facades\Http;
 
 class PaymentGatewayService
 {
-    public static function generateSignature(?array $payload = null): array
+    /**
+     * Generate timestamp + signature
+     */
+    public static function generateSignature(): array
     {
         $timestamp = time();
 
-        $message = empty($payload)
-            ? $timestamp . config('payment_gateway.license_key')
-            : $timestamp . json_encode($payload);
+        /**
+         * IMPORTANT:
+         * Must match middleware exactly:
+         * hash_hmac('sha256', timestamp + license_key, secret)
+         */
+        $message = $timestamp . config('payment_gateway.license_key');
 
         $signature = hash_hmac(
             'sha256',
@@ -26,23 +32,29 @@ class PaymentGatewayService
         ];
     }
 
-    public static function headers(?array $payload = null): array
+    /**
+     * Request headers for API
+     */
+    public static function headers(): array
     {
-        $auth = self::generateSignature($payload);
+        $auth = self::generateSignature();
 
         return [
             'X-LICENSE-KEY' => config('payment_gateway.license_key'),
             'X-TIMESTAMP'   => $auth['timestamp'],
             'X-SIGNATURE'   => $auth['signature'],
             'Accept'        => 'application/json',
+            'Content-Type'  => 'application/json',
         ];
     }
 
-    public static function client(?array $payload = null)
+    /**
+     * HTTP client
+     */
+    public static function client()
     {
-        return Http::timeout(300)
-            ->withHeaders(
-                self::headers($payload)
-            );
+        return Http::timeout(30)
+            ->retry(2, 100)
+            ->withHeaders(self::headers());
     }
 }
