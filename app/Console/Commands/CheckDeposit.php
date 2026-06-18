@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Services\PaymentGatewayService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class CheckDeposit extends Command
 {
@@ -57,14 +58,14 @@ class CheckDeposit extends Command
                     'invoice_id' => $deposit->invoice_id
                 ];
 
-                $paymentResponse = PaymentGatewayService::client(
-                    $paymentPayload
-                )->get(
+
+            $paymentResponse = Http::timeout(20)
+                ->acceptJson()
+                ->get(
                     config('payment_gateway.api_url')
                     . '/api/payments/'
                     . $deposit->invoice_id
                 );
-
                 if (!$paymentResponse->successful()) {
                     throw new \Exception(
                         'Payment status check failed'
@@ -120,13 +121,13 @@ class CheckDeposit extends Command
                             = $deposit->contract_address;
                     }
 
-                    $balanceResponse = PaymentGatewayService::client(
-                        $balancePayload
-                    )->get(
-                        config('payment_gateway.api_url')
-                        . '/api/check-balance',
-                        $balancePayload
-                    );
+                    $balanceResponse = Http::timeout(20)
+                        ->acceptJson()
+                        ->get(
+                            config('payment_gateway.api_url')
+                            . '/api/check-balance',
+                            $balancePayload
+                        );
 
                     if (!$balanceResponse->successful()) {
                         throw new \Exception(
