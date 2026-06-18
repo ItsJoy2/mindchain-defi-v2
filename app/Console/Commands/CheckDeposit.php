@@ -131,26 +131,56 @@ class CheckDeposit extends Command
 
                     if (!$balanceResponse->successful()) {
                         throw new \Exception(
-                            'Balance check failed'
+                            'Balance check failed. Response: ' .
+                            $balanceResponse->body()
                         );
                     }
 
-                    $amount = (float) trim(
-                        $balanceResponse->body()
-                    );
+                    // JSON response হলে
+                    if (
+                        str_contains(
+                            strtolower($balanceResponse->header('content-type') ?? ''),
+                            'application/json'
+                        )
+                    ) {
+
+                        $balanceData = $balanceResponse->json();
+
+                        $amount = (float) (
+                            $balanceData['balance']
+                            ?? $balanceData['amount']
+                            ?? 0
+                        );
+
+                    } else {
+
+                        // Plain text response হলে
+                        $amount = (float) trim(
+                            $balanceResponse->body()
+                        );
+                    }
                 }
 
-                if ($amount <= 0) {
+                /*
+                |--------------------------------------------------------------------------
+                | Skip only when exact balance is zero
+                |--------------------------------------------------------------------------
+                */
+
+                if ($amount == 0) {
 
                     DB::commit();
 
                     $this->line(
-                        "Invoice {$deposit->invoice_id} amount is zero"
+                        "Invoice {$deposit->invoice_id} balance is zero"
                     );
 
                     continue;
                 }
 
+                $this->info(
+                    "Invoice {$deposit->invoice_id} Amount Found: {$amount}"
+                );
                 /*
                 |--------------------------------------------------------------------------
                 | Duplicate Transaction Check
