@@ -51,6 +51,12 @@ class DepositController extends Controller
                     'token_name' => 'MUSD',
                     'contract_address' => '0xaC264f337b2780b9fd277cd9C9B2149B43F87904'
                 ],
+                'BMIND' => [
+                    'chain_id' => 9996,
+                    'type' => 'token',
+                    'token_name' => 'BMIND',
+                    'contract_address' => '0x781Ee88b2558e5c9030C0d436de3F7eDD38d61A2'
+                ],
             ];
 
             if (!isset($wallets[$request->wallet])) {
