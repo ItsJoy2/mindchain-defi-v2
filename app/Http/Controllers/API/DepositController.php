@@ -124,7 +124,7 @@ class DepositController extends Controller
                     'amount'     => $depositJob->amount,
                     'wallet'     => $depositJob->wallet,
                     'status'     => $depositJob->status,
-                    'expires_at' => $depositJob->created_at->addMinutes(20)->timestamp,
+                    'expires_at' => $depositJob->created_at->addMinutes(1)->timestamp,
                 ]
             ]);
 
