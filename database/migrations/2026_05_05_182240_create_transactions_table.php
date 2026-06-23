@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('receiver_id')->nullable();
-            $table->decimal('amount', 16, 2);
+            $table->decimal('amount', 16, 8);
             $table->enum('wallet', ['USDT', 'MIND', 'MUSD', 'BMIND'])->index();
             $table->enum('type', ['Debit', 'Credit'])->index();
             $table->string('method')->nullable();

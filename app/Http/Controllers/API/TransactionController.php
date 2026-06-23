@@ -25,6 +25,7 @@ class TransactionController extends Controller
                 'wallet',
                 'method',
                 'status',
+                'description',
                 'created_at',
                 DB::raw("'transaction' as source")
             ]);
@@ -39,6 +40,7 @@ class TransactionController extends Controller
                 'wallet',
                 'method',
                 'status',
+                'description',
                 'created_at',
                 DB::raw("'ambassador' as source")
             ]);

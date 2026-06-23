@@ -1508,6 +1508,112 @@
             <!-- /.col-->
           </div>
           <!-- /.row-->
+
+          <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                <div class="card-header fw-bold">
+                    User Management
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3 d-flex gap-2" style="max-width: 500px;">
+                    <input
+                        type="search"
+                        class="form-control"
+                        placeholder="Search by email.."
+                        id="searchInput"
+                    />
+
+                    <select class="form-select" style="width: 150px;" id="statusFilter">
+                        <option value="">All Accounts</option>
+                        <option value="invested">Invested</option>
+                        <option value="not_invested">Not Invested</option>
+                    </select>
+                    </div>
+
+                    <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">User</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Invested At</th>
+                            <th scope="col">Joined At</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                        <tr>
+                            <td>1</td>
+                            <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar avatar-md bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                R
+                                </div>
+                                <div>
+                                <div class="fw-semibold">Rahat Khan</div>
+                                <div class="text-muted small">rahat@example.com</div>
+                                </div>
+                            </div>
+                            </td>
+                            <td>
+                            <span class="badge bg-success">Active</span>
+                            </td>
+                            <td class="text-nowrap">May 12, 2026</td>
+                            <td class="text-nowrap">Jan 15, 2026</td>
+                            <td class="text-center">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button class="btn btn-sm btn-outline-info">View</button>
+
+                                <button class="btn btn-sm btn-outline-warning">
+                                <i class="cil-pen"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-success">
+                                <i class="cil-wallet"></i> 
+                                </button>
+
+                                <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-coreui-toggle="dropdown" aria-expanded="false">
+                                    More
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-menu-item dropdown-item" href="#">View Staking</a></li>
+                                    <li><a class="dropdown-menu-item dropdown-item" href="#">View Transaction</a></li>
+                                    <li><a class="dropdown-menu-item dropdown-item" href="#">View Wallet History</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-menu-item dropdown-item" href="#">View Referral Tree</a></li>
+                                </ul>
+                                </div>
+                            </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-3">
+                    <nav aria-label="User pagination">
+                        <ul class="pagination mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Prev</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                        </ul>
+                    </nav>
+                    </div>
+
+                </div>
+                </div>
+            </div>
+            </div>
         </div>
 
 @endsection
