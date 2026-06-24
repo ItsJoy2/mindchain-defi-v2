@@ -1,8 +1,10 @@
 @extends('admin.layouts.app')
 
+@section('title', 'Dashboard')
+
 @section('content')
         <div class="container-lg px-4">
-          <div class="row g-4 mb-4">
+          {{-- <div class="row g-4 mb-4">
             <div class="col-sm-6 col-xl-3">
               <div class="card text-white bg-primary">
                 <div class="card-body pb-0 d-flex justify-content-between align-items-start">
@@ -143,9 +145,9 @@
               </div>
             </div>
             <!-- /.col-->
-          </div>
+          </div> --}}
           <!-- /.row-->
-          <div class="card mb-4">
+          {{-- <div class="card mb-4">
             <div class="card-body">
               <div class="d-flex justify-content-between">
                 <div>
@@ -212,9 +214,9 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> --}}
           <!-- /.card-->
-          <div class="row g-4 mb-4">
+          {{-- <div class="row g-4 mb-4">
             <div class="col-sm-6 col-lg-4">
               <div class="card" style="--cui-card-cap-bg: #3b5998">
                 <div class="card-header position-relative d-flex justify-content-center align-items-center">
@@ -278,9 +280,9 @@
               </div>
             </div>
             <!-- /.col-->
-          </div>
+          </div> --}}
           <!-- /.row-->
-          <div class="row">
+          {{-- <div class="row">
             <div class="col-md-12">
               <div class="card mb-4">
                 <div class="card-header">Traffic &amp; Sales</div>
@@ -1506,7 +1508,7 @@
               </div>
             </div>
             <!-- /.col-->
-          </div>
+          </div> --}}
           <!-- /.row-->
 
           <div class="row">
@@ -1573,7 +1575,7 @@
                                 </button>
 
                                 <button class="btn btn-sm btn-outline-success">
-                                <i class="cil-wallet"></i> 
+                                <i class="cil-wallet"></i>
                                 </button>
 
                                 <div class="dropdown">

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -15,16 +17,26 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required']
+        $request->validate([
+            'login'    => 'required',
+            'password' => 'required',
         ]);
+
+        $loginField = filter_var($request->login, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : 'user_name';
+
+
+        $credentials = [
+            $loginField => $request->login,
+            'password'  => $request->password,
+        ];
 
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()
                 ->withInput()
                 ->withErrors([
-                    'email' => 'Invalid email or password.'
+                    'login' => 'Invalid credentials.'
                 ]);
         }
 
@@ -34,7 +46,7 @@ class AuthController extends Controller
             Auth::logout();
 
             return back()->withErrors([
-                'email' => 'Admin access required.'
+                'login' => 'Admin access required.'
             ]);
         }
 

@@ -137,13 +137,16 @@
                   </svg>
                   Lock Account
                 </a>
-                <a class="dropdown-item" href="/authentication/login.html">
-                  <svg class="icon me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <path fill="var(--ci-primary-color, currentcolor)" d="M77.155 272.034H351.75v-32.001H77.155l75.053-75.053v-.001l-22.628-22.626-113.681 113.68.001.001h-.001L129.58 369.715l22.628-22.627v-.001z" class="ci-primary" />
-                    <path fill="var(--ci-primary-color, currentcolor)" d="M160 16v32h304v416H160v32h336V16z" class="ci-primary" />
-                  </svg>
-                  Logout
-                </a>
+                <form action="{{ route('admin.logout') }}" method="POST" class="m-0 p-0">
+                    @csrf
+                    <button type="submit" class="dropdown-item">
+                        <svg class="icon me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                            <path fill="var(--ci-primary-color, currentcolor)" d="M77.155 272.034H351.75v-32.001H77.155l75.053-75.053v-.001l-22.628-22.626-113.681 113.68.001.001h-.001L129.58 369.715l22.628-22.627v-.001z"/>
+                            <path fill="var(--ci-primary-color, currentcolor)" d="M160 16v32h304v416H160v32h336V16z"/>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
               </div>
             </li>
           </ul>
@@ -151,8 +154,8 @@
         <div class="container-fluid px-4">
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb my-0">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active"><span>Dashboard</span></li>
+              <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
+              <li class="breadcrumb-item active"><span>@yield('title')</span></li>
             </ol>
           </nav>
         </div>

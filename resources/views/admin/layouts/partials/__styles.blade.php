@@ -9,4 +9,4 @@
     <script src="{{ asset('assets/js/color-modes.js') }}"></script>
     <link href="{{ asset('assets/vendors/@coreui/chartjs/css/coreui-chartjs.css') }}" rel="stylesheet">
 
-    @stack('styles')
+    @stack('auth_styles')

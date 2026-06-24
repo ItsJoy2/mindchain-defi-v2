@@ -18,4 +18,4 @@
 
 
 
-    @stack('scripts')
+    @stack('auth_scripts')
