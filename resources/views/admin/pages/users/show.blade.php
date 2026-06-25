@@ -6,6 +6,16 @@
 
 <div class="row">
 
+    <div class="body flex-grow-1">
+        <div class="container-lg px-4">
+
+            @include('admin.components.alerts')
+
+            @yield('content')
+
+        </div>
+    </div>
+
     {{-- Profile --}}
     <div class="col-lg-4">
 
@@ -179,27 +189,38 @@
 
             @foreach($wallets as $wallet => $balance)
 
-                <div class="col-md-3 mb-3">
+            <div class="col-md-3 col-sm-6 mb-3">
 
-                    <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm h-100">
 
-                        <div class="card-body">
+                    <div class="card-body text-center">
 
-                            <div class="text-muted small">
-                                {{ $wallet }}
-                            </div>
-
-                            <h5 class="mb-0">
-                                {{ number_format($balance, 3) }}
-                            </h5>
-
+                        <div class="text-muted small mb-1">
+                            {{ $wallet }}
                         </div>
+
+                        <h5 class="mb-3 fw-bold">
+                            {{ number_format($balance, 3) }}
+                        </h5>
+
+                        <button
+                            class="btn btn-sm btn-outline-warning wallet-adjust-btn"
+                            data-wallet="{{ $wallet }}"
+                            data-coreui-toggle="modal"
+                            data-coreui-target="#walletAdjustModal"
+                        >
+                            Wallet Adjust
+                        </button>
 
                     </div>
 
                 </div>
 
+            </div>
+
             @endforeach
+
+            @include('admin.pages.users.models.__wallet-adjust')
 
         </div>
 
@@ -273,6 +294,38 @@
 </div>
 
 
+
+<style>
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 38px !important;
+        min-height: 38px !important;
+
+        background-color: transparent !important;
+        border: 1px solid var(--cui-border-color) !important;
+        color: var(--cui-body-color) !important;
+    }
+
+    .select2-container--default .select2-selection__rendered {
+        line-height: 36px !important;
+        color: var(--cui-body-color) !important;
+    }
+
+    .select2-dropdown {
+        background: var(--cui-body-bg) !important;
+        border: 1px solid var(--cui-border-color) !important;
+    }
+
+    .select2-search__field {
+        background: transparent !important;
+        color: var(--cui-body-color) !important;
+    }
+</style>
+
+
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -298,6 +351,22 @@
             processResults: function(data) {
                 return data;
             }
+        }
+    });
+
+
+    // wallet adjust button click event
+    $(document).on('click', '.wallet-adjust-btn', function () {
+
+        let wallet = $(this).data('wallet');
+
+        $('#walletName').val(wallet);
+        $('#walletDisplay').val(wallet);
+
+        if (wallet === 'AMBASSADOR') {
+            $('.modal-title').text('Adjust Ambassador Wallet');
+        } else {
+            $('.modal-title').text('Adjust ' + wallet + ' Wallet');
         }
     });
 </script>

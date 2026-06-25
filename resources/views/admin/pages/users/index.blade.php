@@ -50,8 +50,8 @@
                     <table class="table table-bordered table-hover align-middle">
 
                         <thead>
-                            <tr>
-                                <th width="70">#</th>
+                            <tr class="text-center">
+                                <th>#</th>
                                 <th>User</th>
                                 <th>Status</th>
                                 <th>KYC</th>
@@ -68,7 +68,7 @@
 
                             <tr>
 
-                                <td>
+                                <td class="text-center">
                                     {{ $users->firstItem() + $loop->index }}
                                 </td>
 
@@ -136,18 +136,18 @@
                                         <a
                                             href="{{ route('admin.users.show', $user->id) }}"
                                             class="btn btn-sm btn-outline-info"
+                                            title="View User"
                                         >
-                                            View
+                                            <i class="fas fa-eye"></i>
                                         </a>
-
-                                        <a
+                                        {{-- <a
                                             href=""
                                             class="btn btn-sm btn-outline-warning"
                                         >
                                             <i class="cil-pen"></i>
-                                        </a>
+                                        </a> --}}
 
-                                        <div class="dropdown">
+                                        {{-- <div class="dropdown">
 
                                             <button
                                                 class="btn btn-sm btn-outline-secondary dropdown-toggle"
@@ -201,7 +201,7 @@
 
                                             </ul>
 
-                                        </div>
+                                        </div> --}}
 
                                     </div>
 

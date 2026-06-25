@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AmbassadorHistory;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
@@ -45,12 +47,13 @@ class UserController extends Controller
     {
         $wallets = $walletService->getAllBalances($user->id);
 
-        $sponsors = User::select('id', 'user_name', 'email')
-            ->where('id', '!=', $user->id)
-            ->orderBy('user_name')
-            ->get();
+        $wallets['AMBASSADOR'] = AmbassadorHistory::where('user_id', $user->id)
+            ->sum('amount');
 
-        return view('admin.pages.users.show', compact('user','wallets','sponsors'));
+        return view('admin.pages.users.show', compact(
+            'user',
+            'wallets'
+        ));
     }
 
     public function update(Request $request, User $user)
@@ -107,6 +110,49 @@ class UserController extends Controller
         return back()->with(
             'success',
             'Password updated successfully.'
+        );
+    }
+
+    public function adjustWallet(Request $request, User $user)
+    {
+        $request->validate([
+            'wallet' => 'required|in:MIND,MUSD,USDT,BMIND,AMBASSADOR',
+            'action' => 'required|in:add,deduct',
+            'amount' => 'required|numeric|min:0.001',
+        ]);
+
+        $amount = $request->action === 'deduct'
+            ? -abs($request->amount)
+            : abs($request->amount);
+
+        if ($request->wallet === 'AMBASSADOR') {
+
+            AmbassadorHistory::create([
+                'user_id'     => $user->id,
+                'amount'      => $amount,
+                'wallet'      => 'MIND',
+                'type'        => $request->action === 'add' ? 'Credit' : 'Debit',
+                'method'      => 'Balance Adjustment',
+                'description' => $amount . ' MIND ' . ($request->action === 'add' ? 'added to' : 'deducted from') . ' by Administrator.',
+                'status'      => 'Approved',
+            ]);
+
+        } else {
+
+            Transaction::create([
+                'user_id'     => $user->id,
+                'amount'      => $amount,
+                'wallet'      => $request->wallet,
+                'type'        => $request->action === 'add' ? 'Credit' : 'Debit',
+                'method'      => 'Balance Adjustment',
+                'description' => $amount . ' ' . $request->wallet . ' ' . ($request->action === 'add' ? 'added to' : 'deducted from') . ' by Administrator.',
+                'status'      => 'Approved',
+            ]);
+        }
+
+        return back()->with(
+            'success',
+            "{$request->wallet} wallet adjusted successfully."
         );
     }
 }
