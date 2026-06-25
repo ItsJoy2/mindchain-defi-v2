@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="row">
+<div class="row m-2">
 
     <div class="body flex-grow-1">
         <div class="container-lg px-4">
@@ -127,7 +127,7 @@
                     <div class="col-md-6 mb-3">
                         <strong>Sponsor</strong>
                         <div>
-                            {{ optional($user->sponsor)->user_name ?? 'Root User' }}
+                            {{ optional($user->sponsor)->user_name ?? 'No Sponsor' }}
                         </div>
                     </div>
 
@@ -177,7 +177,7 @@
 </div>
 
 {{-- Wallets --}}
-<div class="card mb-4">
+<div class="card mb-4 m-4">
 
     <div class="card-header fw-bold">
         Wallet Balances
@@ -229,7 +229,7 @@
 </div>
 
 {{-- Status --}}
-<div class="card">
+<div class="card m-4">
 
     <div class="card-header fw-bold">
         Account Status

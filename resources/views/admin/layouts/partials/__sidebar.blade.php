@@ -25,6 +25,15 @@
                 Users
             </a>
         </li>
+        <li class="nav-item">
+            <a
+                class="nav-link {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}"
+                href="{{ route('admin.transactions.index') }}"
+            >
+                <i class="fas fa-exchange-alt nav-icon"></i>
+                Transaction History
+            </a>
+        </li>
       </ul>
       <div class="sidebar-footer border-top d-none d-md-flex">
         <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>

@@ -57,7 +57,7 @@ class BmindDailyStaking extends Command
                     if ($sponsor && $row->seller_bonus_rate > 0) {
 
                         // seller_bonus_rate % from daily bonus
-                        $sellerBonus = number_format($row->daily * ($row->seller_bonus_rate / 100), 2);
+                        $sellerBonus = $row->daily * ($row->seller_bonus_rate / 100);
 
                         Transaction::create([
                             'user_id'     => $sponsor->id,
