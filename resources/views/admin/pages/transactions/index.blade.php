@@ -4,7 +4,8 @@
 
 @section('content')
 
-<div class="row">
+
+<div class="row m-0">
     <div class="col-12">
 
         <div class="card">
@@ -15,13 +16,69 @@
 
             <div class="card-body">
 
+                <form method="GET" class="mb-4">
+                    <div class="row g-2">
+
+                        <div class="col-md-5">
+                            <input
+                                type="text"
+                                name="search"
+                                class="form-control"
+                                placeholder="Username, Email, TXN ID..."
+                                value="{{ request('search') }}"
+                            >
+                        </div>
+
+                        <div class="col-md-3">
+                            <select name="wallet" class="form-select">
+                                <option value="">All Wallets</option>
+
+                                <option value="MIND"
+                                    {{ request('wallet') == 'MIND' ? 'selected' : '' }}>
+                                    MIND
+                                </option>
+
+                                <option value="MUSD"
+                                    {{ request('wallet') == 'MUSD' ? 'selected' : '' }}>
+                                    MUSD
+                                </option>
+
+                                <option value="BMIND"
+                                    {{ request('wallet') == 'BMIND' ? 'selected' : '' }}>
+                                    BMIND
+                                </option>
+
+                                <option value="USDT"
+                                    {{ request('wallet') == 'USDT' ? 'selected' : '' }}>
+                                    USDT
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                Search
+                            </button>
+                        </div>
+
+                        <div class="col-md-2">
+                            <a href="{{ route('admin.transactions.index') }}"
+                               class="btn btn-secondary w-100">
+                                Reset
+                            </a>
+                        </div>
+
+                    </div>
+                </form>
+
                 <div class="table-responsive">
 
-                    <table class="table table-bordered table-hover align-middle">
+                    <table class="table table-bordered table-hover align-middle transaction-table">
 
                         <thead>
                             <tr class="text-center">
-                                <th width="70">No.</th>
+                                <th>No.</th>
+                                <th>User</th>
                                 <th>Method / Date</th>
                                 <th>Asset / Amount</th>
                                 <th>Type / Status</th>
@@ -31,96 +88,107 @@
 
                         <tbody>
 
-                            @forelse($histories as $history)
+                        @forelse($histories as $history)
 
-                                <tr>
+                            @php
+                                $type = strtolower($history->type ?? '');
 
-                                    <td class="text-center">
-                                        {{ $histories->firstItem() + $loop->index }}
-                                    </td>
+                                $isCredit = in_array($type, [
+                                    'credit',
+                                    'deposit',
+                                    'bonus',
+                                    'reward',
+                                    'income',
+                                    'commission'
+                                ]);
 
-                                    <td>
-                                        <div class="fw-bold">
-                                            {{ $history->method ?? 'SYSTEM' }}
-                                        </div>
+                                $typeClass = $isCredit
+                                    ? 'badge-credit'
+                                    : 'badge-debit';
 
-                                        <small class="text-muted">
-                                            {{ \Carbon\Carbon::parse($history->created_at)->format('d M Y h:i A') }}
-                                        </small>
-                                    </td>
+                                $amountClass = $isCredit
+                                    ? 'amount-positive'
+                                    : 'amount-negative';
 
-                                    <td>
-                                        <div class="fw-semibold">
-                                            {{ $history->wallet }}
-                                        </div>
+                                $status = strtolower($history->status ?? '');
 
-                                        <div class="text-success">
-                                            {{ number_format($history->amount, 8) }}
-                                        </div>
-                                    </td>
+                                if (in_array($status, ['approved','completed','success'])) {
+                                    $statusClass = 'badge-approved';
+                                } elseif ($status == 'pending') {
+                                    $statusClass = 'badge-pending';
+                                } else {
+                                    $statusClass = 'badge-failed';
+                                }
+                            @endphp
 
-                                    <td>
+                            <tr>
 
-                                        <div class="mb-1">
+                                <td class="text-center">
+                                    {{ $histories->firstItem() + $loop->index }}
+                                </td>
 
-                                            @php
-                                                $typeColor = match(strtolower($history->type ?? '')) {
-                                                    'deposit' => 'success',
-                                                    'withdraw' => 'danger',
-                                                    'transfer' => 'info',
-                                                    'bonus' => 'primary',
-                                                    default => 'secondary',
-                                                };
-                                            @endphp
+                                <td class="text-nowrap">
+                                    <div class="user-name">
+                                        {{ $history->user_name ?? 'N/A' }}
+                                    </div>
 
-                                            <span class="badge bg-{{ $typeColor }}">
-                                                {{ ucfirst($history->type) }}
-                                            </span>
+                                    <div class="user-email">
+                                        {{ $history->email ?? '-' }}
+                                    </div>
+                                </td>
 
-                                        </div>
+                                <td class="text-nowrap">
+                                    <div class="method-title">
+                                        {{ $history->method ?? 'SYSTEM' }}
+                                    </div>
 
-                                        <div>
+                                    <div class="date-text">
+                                        {{ \Carbon\Carbon::parse($history->created_at)->format('d M Y h:i A') }}
+                                    </div>
+                                </td>
 
-                                            @php
-                                                $statusColor = match(strtolower($history->status ?? '')) {
-                                                    'success', 'approved', 'completed' => 'success',
-                                                    'pending' => 'warning',
-                                                    'failed', 'rejected' => 'danger',
-                                                    default => 'secondary',
-                                                };
-                                            @endphp
+                                <td class="text-nowrap">
+                                    <div class="fw-semibold">
+                                        {{ $history->wallet }}
+                                    </div>
 
-                                            <span class="badge bg-{{ $statusColor }}">
-                                                {{ ucfirst($history->status) }}
-                                            </span>
+                                    <div class="{{ $amountClass }}">
+                                        {{ number_format($history->amount, 3) }}
+                                    </div>
+                                </td>
 
-                                        </div>
+                                <td class="text-nowrap">
 
-                                    </td>
+                                    <div class="d-flex flex-column gap-2">
 
-                                    <td>
+                                        <span class="custom-badge {{ $typeClass }}">
+                                            <span class="badge-dot"></span>
+                                            {{ strtoupper($history->type ?? '-') }}
+                                        </span>
 
-                                        <div>
-                                            {{ $history->description ?: '-' }}
-                                        </div>
+                                        <span class="custom-badge {{ $statusClass }}">
+                                            {{ strtoupper($history->status ?? '-') }}
+                                        </span>
 
-                                        <small class="text-muted">
-                                            {{ $history->source }}
-                                        </small>
+                                    </div>
 
-                                    </td>
+                                </td>
 
-                                </tr>
+                                <td>
+                                    {{ $history->description ?: '-' }}
+                                </td>
 
-                            @empty
+                            </tr>
 
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        No transaction history found.
-                                    </td>
-                                </tr>
+                        @empty
 
-                            @endforelse
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    No transaction history found.
+                                </td>
+                            </tr>
+
+                        @endforelse
 
                         </tbody>
 
@@ -129,7 +197,7 @@
                 </div>
 
                 <div class="mt-3">
-                    {{ $histories->links('admin.components.pagination') }}
+                    {{ $histories->appends(request()->query())->links('admin.components.pagination') }}
                 </div>
 
             </div>

@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\TransactionsController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [AuthController::class, 'showLogin'])->name('admin.login');
+Route::get('/', [AuthController::class, 'showLogin'])->name('login');
 
 // Route::get('account/verify/{token}', [AuthController::class, 'verifyEmail'])->name('user.verify');
 
@@ -28,6 +28,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('users/{user}',[UserController::class, 'update'])->name('users.update');
     Route::put('users/{user}/password',[UserController::class, 'updatePassword'])->name('users.password.update');
     Route::post('users/{user}/wallet-adjust',[UserController::class, 'adjustWallet'])->name('users.wallet.adjust');
-    Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');
+
+
+    Route::get('transactions', [TransactionsController::class, 'index'])->name('transactions.index');
+    Route::get( 'ambassador-history',[TransactionsController::class, 'ambassadorHistory'])->name('admin.ambassador-history.index');
 
 });
