@@ -125,10 +125,10 @@
                                     @endif
                                 </td>
 
-                                <td class="text-nowrap">
-                                    {{ $user->created_at->format('d M Y') }}
-                                </td>
+                                <td class="text-nowrap local-time" data-time="{{ $user->created_at->toIso8601String() }}">
+                                    {{ $user->created_at}}
 
+                                </td>
                                 <td class="text-center">
 
                                     <div class="d-flex gap-2 justify-content-center">

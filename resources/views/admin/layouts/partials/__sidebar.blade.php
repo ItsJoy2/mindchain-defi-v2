@@ -25,14 +25,128 @@
                 Users
             </a>
         </li>
-        <li class="nav-item">
-            <a
-                class="nav-link {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}"
-                href="{{ route('admin.transactions.index') }}"
-            >
-                <i class="fas fa-exchange-alt nav-icon"></i>
-                Transaction History
+        <li class="nav-group {{ request()->routeIs('admin.history.*') ? 'show' : '' }}">
+
+            <a class="nav-link nav-group-toggle {{ request()->routeIs('admin.history.*') ? 'active' : '' }}"
+            href="#">
+
+                <i class="fas fa-history nav-icon"></i>
+
+                Investment History
             </a>
+
+            <ul class="nav-group-items">
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.history.angel-staking') ? 'active' : '' }}"
+                    href="{{ route('admin.history.angel-staking') }}">
+
+                        <span class="nav-icon"></span>
+
+                        Angel Staking
+                    </a>
+                </li>
+
+                {{-- Future History Pages --}}
+
+                {{--
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.history.deposit') ? 'active' : '' }}"
+                    href="{{ route('admin.history.deposit') }}">
+                        <span class="nav-icon"></span>
+                        Deposit History
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.history.withdraw') ? 'active' : '' }}"
+                    href="{{ route('admin.history.withdraw') }}">
+                        <span class="nav-icon"></span>
+                        Withdraw History
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.history.transfer') ? 'active' : '' }}"
+                    href="{{ route('admin.history.transfer') }}">
+                        <span class="nav-icon"></span>
+                        Transfer History
+                    </a>
+                </li>
+                --}}
+
+            </ul>
+
+        </li>
+        <li class="nav-group {{ request()->routeIs('admin.transactions.*') || request()->routeIs('admin.ambassador-history.*') ? 'show' : '' }}">
+
+            <a class="nav-link nav-group-toggle" href="#">
+                <i class="fas fa-exchange-alt nav-icon"></i>
+                Transactions
+            </a>
+
+            <ul class="nav-group-items compact">
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}"
+                        href="{{ route('admin.transactions.index') }}"
+                    >
+                        <span class="nav-icon">
+                            <span class="nav-icon-bullet"></span>
+                        </span>
+                        Transaction History
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link {{ request()->routeIs('admin.ambassador-history.*') ? 'active' : '' }}"
+                        href="{{ route('admin.ambassador-history.index') }}"
+                    >
+                        <span class="nav-icon">
+                            <span class="nav-icon-bullet"></span>
+                        </span>
+                        Ambassador History
+                    </a>
+                </li>
+
+            </ul>
+
+        </li>
+        <li class="nav-group {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}">
+
+            <a class="nav-link nav-group-toggle" href="#">
+                <i class="fas fa-cogs nav-icon"></i>
+                Settings
+            </a>
+
+            <ul class="nav-group-items compact">
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}"
+                        href="{{ route('admin.settings.index') }}">
+                        <span class="nav-icon">
+                            <span class="nav-icon-bullet"></span>
+                        </span>
+                        Investment Settings
+                    </a>
+
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.settings.wallet-icons') ? 'active' : '' }}"
+                        href="{{ route('admin.settings.wallet-icons') }}">
+                        <span class="nav-icon">
+                            <span class="nav-icon-bullet"></span>
+                        </span>
+                        Wallet Icons
+                    </a>
+
+                </li>
+
+            </ul>
+
         </li>
       </ul>
       <div class="sidebar-footer border-top d-none d-md-flex">

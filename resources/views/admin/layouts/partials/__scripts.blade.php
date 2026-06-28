@@ -16,6 +16,27 @@
     <script src="{{ asset('assets/vendors/@coreui/utils/js/index.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            document.querySelectorAll('.local-time').forEach(function (el) {
+
+                const date = new Date(el.dataset.time);
+
+                const options = {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                };
+
+                el.textContent = new Intl.DateTimeFormat(undefined, options).format(date);
+            });
+
+        });
+    </script>
 
 
     @stack('auth_scripts')

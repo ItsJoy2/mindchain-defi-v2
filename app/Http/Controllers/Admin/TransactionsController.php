@@ -77,7 +77,7 @@ class TransactionsController extends Controller
             ->withQueryString();
 
         return view(
-            'admin.pages.ambassador-history.index',
+            'admin.pages.transactions.ambassador-history',
             compact('histories', 'search', 'wallet')
         );
     }

@@ -12,7 +12,7 @@
                 <div class="modal-header">
 
                     <h5 class="modal-title">
-                        Change Password
+                        Change User Password
                     </h5>
 
                     <button

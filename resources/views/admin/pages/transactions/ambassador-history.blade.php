@@ -1,9 +1,8 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Transaction History')
+@section('title', 'Ambassador History')
 
 @section('content')
-
 
 <div class="row m-0">
     <div class="col-12">
@@ -11,7 +10,7 @@
         <div class="card">
 
             <div class="card-header">
-                <strong>Transaction History</strong>
+                <strong>Ambassador History</strong>
             </div>
 
             <div class="card-body">
@@ -24,36 +23,32 @@
                                 type="text"
                                 name="search"
                                 class="form-control"
-                                placeholder="Username & Email..."
+                                placeholder="Search by Username or Email..."
                                 value="{{ request('search') }}"
                             >
                         </div>
 
-                        <div class="col-md-3">
+                        {{-- <div class="col-md-3">
                             <select name="wallet" class="form-select">
                                 <option value="">All Wallets</option>
 
-                                <option value="MIND"
-                                    {{ request('wallet') == 'MIND' ? 'selected' : '' }}>
+                                <option value="MIND" {{ request('wallet') == 'MIND' ? 'selected' : '' }}>
                                     MIND
                                 </option>
 
-                                <option value="MUSD"
-                                    {{ request('wallet') == 'MUSD' ? 'selected' : '' }}>
+                                <option value="MUSD" {{ request('wallet') == 'MUSD' ? 'selected' : '' }}>
                                     MUSD
                                 </option>
 
-                                <option value="BMIND"
-                                    {{ request('wallet') == 'BMIND' ? 'selected' : '' }}>
+                                <option value="BMIND" {{ request('wallet') == 'BMIND' ? 'selected' : '' }}>
                                     BMIND
                                 </option>
 
-                                <option value="USDT"
-                                    {{ request('wallet') == 'USDT' ? 'selected' : '' }}>
+                                <option value="USDT" {{ request('wallet') == 'USDT' ? 'selected' : '' }}>
                                     USDT
                                 </option>
                             </select>
-                        </div>
+                        </div> --}}
 
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100">
@@ -62,7 +57,7 @@
                         </div>
 
                         <div class="col-md-2">
-                            <a href="{{ route('admin.transactions.index') }}"
+                            <a href="{{ route('admin.ambassador-history.index') }}"
                                class="btn btn-secondary w-100">
                                 Reset
                             </a>
@@ -102,13 +97,8 @@
                                     'commission'
                                 ]);
 
-                                $typeClass = $isCredit
-                                    ? 'badge-credit'
-                                    : 'badge-debit';
-
-                                $amountClass = $isCredit
-                                    ? 'amount-positive'
-                                    : 'amount-negative';
+                                $typeClass = $isCredit ? 'badge-credit' : 'badge-debit';
+                                $amountClass = $isCredit ? 'amount-positive' : 'amount-negative';
 
                                 $status = strtolower($history->status ?? '');
 
@@ -121,24 +111,22 @@
                                 }
                             @endphp
 
-                            <tr class=" text-nowrap" >
+                            <tr class="text-nowrap">
 
                                 <td class="text-center">
                                     {{ $histories->firstItem() + $loop->index }}
                                 </td>
 
                                 <td>
-                                    <div>
-                                        {{ $history->user_name ?? 'N/A' }}
-                                    </div>
+                                    <div>{{ $history->user_name ?? 'N/A' }}</div>
 
                                     <div class="user-email">
                                         {{ $history->email ?? '-' }}
                                     </div>
                                 </td>
 
-                                <td >
-                                    <div >
+                                <td>
+                                    <div>
                                         {{ $history->method ?? 'SYSTEM' }}
                                     </div>
 
@@ -147,34 +135,32 @@
                                     </div>
                                 </td>
 
-                                <td >
-                                    <div>
-                                        {{ $history->wallet }}
-                                    </div>
+                                <td>
+                                    <div>{{ $history->wallet }}</div>
 
                                     <div class="{{ $amountClass }}">
                                         {{ number_format($history->amount, 3) }}
                                     </div>
                                 </td>
 
-                                <td >
+                                <td>
 
                                     <div class="d-flex flex-column">
 
                                         <span class="custom-badge {{ $typeClass }}">
                                             <span class="badge-dot"></span>
-                                            {{ strtoupper($history->type ?? '-') }}
+                                            {{ strtoupper($history->type) }}
                                         </span>
 
                                         <span class="custom-badge {{ $statusClass }}">
-                                            {{ strtoupper($history->status ?? '-') }}
+                                            {{ strtoupper($history->status) }}
                                         </span>
 
                                     </div>
 
                                 </td>
 
-                                <td >
+                                <td>
                                     {{ $history->description ?: '-' }}
                                 </td>
 
@@ -184,7 +170,7 @@
 
                             <tr>
                                 <td colspan="6" class="text-center py-4">
-                                    No transaction history found.
+                                    No ambassador history found.
                                 </td>
                             </tr>
 

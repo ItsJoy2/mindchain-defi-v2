@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="author" content="MINDCHAIN ECOSYSTEM">
     <title>Mindchain Wallet - Admin Authentication </title>

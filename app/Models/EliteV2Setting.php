@@ -28,6 +28,6 @@ class EliteV2Setting extends Model
         'sponsor_bonus' => 'float',
         'lvl1' => 'integer',
         'lvl2' => 'integer',
-        'status' => 'string',
+        'status' => 'boolean',
     ];
 }

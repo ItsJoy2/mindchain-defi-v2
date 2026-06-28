@@ -74,7 +74,55 @@
                                 Search by username or email
                             </small>
                         </div>
+                        <hr>
 
+                        <div class="row">
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Ambassador
+                                </label>
+
+                                <select name="ambassador" class="form-select">
+                                    <option value="1" {{ $user->ambassador ? 'selected' : '' }}>
+                                        Enabled
+                                    </option>
+                                    <option value="0" {{ !$user->ambassador ? 'selected' : '' }}>
+                                        Disabled
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Merchant
+                                </label>
+
+                                <select name="merchant_status" class="form-select">
+                                    <option value="1" {{ $user->merchant_status ? 'selected' : '' }}>
+                                        Enabled
+                                    </option>
+                                    <option value="0" {{ !$user->merchant_status ? 'selected' : '' }}>
+                                        Disabled
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Consultant
+                                </label>
+
+                                <select name="consultant" class="form-select">
+                                    <option value="1" {{ $user->consultant ? 'selected' : '' }}>
+                                        Enabled
+                                    </option>
+                                    <option value="0" {{ !$user->consultant ? 'selected' : '' }}>
+                                        Disabled
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
                     </div>
 
                 </div>
