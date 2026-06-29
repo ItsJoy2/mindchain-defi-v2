@@ -23,6 +23,14 @@ class DashboardController extends Controller
 
             $user = Auth::user();
 
+            // Account block check
+            if ($user->is_block) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Your account has been blocked. Please contact support.'
+                ], 403);
+            }
+
             $userId = $user->id;
 
             // Static Prices
