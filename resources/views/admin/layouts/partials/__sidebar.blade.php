@@ -32,10 +32,30 @@
 
                 <i class="fas fa-history nav-icon"></i>
 
-                Investment History
+                Staking History
             </a>
 
             <ul class="nav-group-items">
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.history.purchase-staking') ? 'active' : '' }}"
+                    href="{{ route('admin.history.purchase-staking') }}">
+
+                        <span class="nav-icon"></span>
+
+                        Purchase Staking
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.history.elite-staking') ? 'active' : '' }}"
+                    href="{{ route('admin.history.elite-staking') }}">
+
+                        <span class="nav-icon"></span>
+
+                        Elite Staking
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.history.angel-staking') ? 'active' : '' }}"
@@ -47,33 +67,15 @@
                     </a>
                 </li>
 
-                {{-- Future History Pages --}}
-
-                {{--
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.history.deposit') ? 'active' : '' }}"
-                    href="{{ route('admin.history.deposit') }}">
+                    <a class="nav-link {{ request()->routeIs('admin.history.mkids-staking') ? 'active' : '' }}"
+                    href="{{ route('admin.history.mkids-staking') }}">
+
                         <span class="nav-icon"></span>
-                        Deposit History
+
+                        MKids Staking
                     </a>
                 </li>
-
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.history.withdraw') ? 'active' : '' }}"
-                    href="{{ route('admin.history.withdraw') }}">
-                        <span class="nav-icon"></span>
-                        Withdraw History
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.history.transfer') ? 'active' : '' }}"
-                    href="{{ route('admin.history.transfer') }}">
-                        <span class="nav-icon"></span>
-                        Transfer History
-                    </a>
-                </li>
-                --}}
 
             </ul>
 

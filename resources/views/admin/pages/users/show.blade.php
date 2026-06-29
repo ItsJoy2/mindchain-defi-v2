@@ -20,7 +20,6 @@
     <div class="col-lg-4">
 
         <div class="card mb-4">
-
             <div class="card-body text-center">
 
                 @if($user->image)
@@ -38,30 +37,56 @@
                     </div>
                 @endif
 
-                <h5 class="mb-1">
-                    {{ $user->name ?: $user->user_name }}
-                </h5>
+                <h5 class="mb-1">{{ $user->name ?: $user->user_name }}</h5>
 
-                <p class="text-muted mb-1">
-                    {{ $user->email }}
-                </p>
-
-                <p class="text-muted">
-                    {{ $user->contact ?: 'No Contact' }}
-                </p>
+                <p class="text-muted mb-1">{{ $user->email }}</p>
 
                 @if($user->status)
-                    <span class="badge bg-success">
-                        Active
-                    </span>
+                    <span class="badge bg-success px-3 py-2">Active</span>
                 @else
-                    <span class="badge bg-danger">
-                        Inactive
-                    </span>
+                    <span class="badge bg-danger px-3 py-2">Inactive</span>
                 @endif
 
-            </div>
+                <div class="border rounded p-3 mt-4 text-start">
 
+                    <h6 class="fw-bold mb-3">
+                        <i class="cil-shield-alt me-2"></i>
+                        Security & Permissions
+                    </h6>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span>Account Status</span>
+
+                        @if($user->is_block)
+                            <span class="badge bg-danger">Blocked</span>
+                        @else
+                            <span class="badge bg-success">Active</span>
+                        @endif
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span>Transfer Permission</span>
+
+                        @if($user->transfer_block)
+                            <span class="badge bg-danger">Blocked</span>
+                        @else
+                            <span class="badge bg-success">Allowed</span>
+                        @endif
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2">
+                        <span>Withdraw Permission</span>
+
+                        @if($user->withdraw_block)
+                            <span class="badge bg-danger">Blocked</span>
+                        @else
+                            <span class="badge bg-success">Allowed</span>
+                        @endif
+                    </div>
+
+                </div>
+
+            </div>
         </div>
 
     </div>

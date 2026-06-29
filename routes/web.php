@@ -35,6 +35,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('transactions', [TransactionsController::class, 'index'])->name('transactions.index');
     Route::get( 'ambassador-history',[TransactionsController::class, 'ambassadorHistory'])->name('ambassador-history.index');
 
+    //settimgs
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::post('angel', [SettingController::class, 'updateAngel'])->name('angel');
@@ -48,10 +49,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('wallet-icons', [SettingController::class, 'walletIcons'])->name('wallet-icons');
         Route::post('wallet-icons', [SettingController::class, 'updateWalletIcons'])->name('wallet-icons.update');
     });
-    
+
     //investment History
     Route::prefix('history')->name('history.')->group(function () {
-        Route::get('angel-staking', [InvestmentHistoryController::class, 'angelStaking'])
-        ->name('angel-staking');
+        Route::get('purchase-staking', [InvestmentHistoryController::class, 'index'])->name('purchase-staking');
+        Route::get('elite-staking', [InvestmentHistoryController::class, 'eliteStaking'])->name('elite-staking');
+        Route::get('angel-staking', [InvestmentHistoryController::class, 'angelStaking'])->name('angel-staking');
+        Route::get('/mkids-staking', [InvestmentHistoryController::class, 'mkidsStaking'])->name('mkids-staking');
+    });
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [AuthController::class, 'profile'])->name('index');
+        Route::put('/', [AuthController::class, 'profileUpdate'])->name('update');
+        Route::put('password', [AuthController::class, 'changePassword'])->name('password');
     });
 });

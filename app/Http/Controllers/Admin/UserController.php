@@ -61,14 +61,13 @@ class UserController extends Controller
         $request->validate([
             'user_name' => 'required|unique:users,user_name,' . $user->id,
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'sponsor_id' => [
-                'nullable',
-                'exists:users,id',
-                Rule::notIn([$user->id]),
-            ],
+            'sponsor_id' => ['nullable','exists:users,id',Rule::notIn([$user->id]),],
             'merchant_status' => 'required|boolean',
             'consultant' => 'required|boolean',
             'ambassador' => 'required|boolean',
+            'is_block' => 'required|boolean',
+            'transfer_block' => 'required|boolean',
+            'withdraw_block' => 'required|boolean',
         ]);
 
         $user->update([
@@ -79,6 +78,10 @@ class UserController extends Controller
             'merchant_status'  => $request->merchant_status,
             'consultant'       => $request->consultant,
             'ambassador'       => $request->ambassador,
+
+            'is_block' => $request->is_block,
+            'transfer_block' => $request->transfer_block,
+            'withdraw_block' => $request->withdraw_block,
         ]);
 
         return back()->with(

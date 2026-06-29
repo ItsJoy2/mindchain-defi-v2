@@ -15,7 +15,8 @@
     <script src="{{ asset('assets/vendors/@coreui/chartjs/js/coreui-chartjs.js') }}"></script>
     <script src="{{ asset('assets/vendors/@coreui/utils/js/index.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 

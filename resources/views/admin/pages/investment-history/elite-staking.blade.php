@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Angel Staking History')
+@section('title', 'Elite Staking History')
 
 @section('content')
 
@@ -8,10 +8,57 @@
 
     <div class="card">
 
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">
-                Angel Staking History
-            </h4>
+                <div class="card-header">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                <h4 class="mb-0">
+                    Elite Staking History
+                </h4>
+
+                <form method="GET" class="row g-2">
+
+                    <div class="col-auto">
+                        <input type="text"
+                               name="search"
+                               class="form-control"
+                               placeholder="Username or Email"
+                               value="{{ request('search') }}">
+                    </div>
+
+                    <div class="col-auto">
+                        <select name="wallet" class="form-select">
+                            <option value="">All Wallets</option>
+
+                            <option value="MUSD"
+                                {{ request('wallet') == 'MUSD' ? 'selected' : '' }}>
+                                MUSD
+                            </option>
+
+                            <option value="USDT"
+                                {{ request('wallet') == 'USDT' ? 'selected' : '' }}>
+                                USDT
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-auto">
+                        <button class="btn btn-primary">
+                            Search
+                        </button>
+                    </div>
+
+                    <div class="col-auto">
+                        <a href="{{ route('admin.history.elite-staking') }}"
+                           class="btn btn-secondary">
+                            Reset
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
         <div class="card-body p-0">
@@ -24,6 +71,7 @@
                         <tr>
                             <th>#</th>
                             <th>User</th>
+                            <th>Wallet</th>
                             <th>Amount</th>
                             <th>Duration</th>
                             <th>Daily Bonus</th>
@@ -50,7 +98,11 @@
                                 </td>
 
                                 <td>
-                                    {{ number_format($investment->amount, 2) }}
+                                    {{ ucwords(str_replace('_', ' ', $investment->wallet)) }}
+                                </td>
+
+                                <td>
+                                    {{ number_format($investment->amount, 8) }}
                                 </td>
 
                                 <td>
@@ -58,7 +110,7 @@
                                 </td>
 
                                 <td>
-                                    {{ number_format($investment->daily_bonus, 2) }}
+                                    {{ number_format($investment->daily_bonus, 8) }}
                                 </td>
 
                                 <td>
@@ -66,7 +118,6 @@
                                 </td>
 
                                 <td>
-
                                     @if($investment->status)
                                         <span class="badge bg-info">
                                             Running
@@ -76,12 +127,11 @@
                                             Completed
                                         </span>
                                     @endif
-
                                 </td>
 
                                 <td>
                                     <span class="local-time"
-                                        data-time="{{ $investment->created_at->toIso8601String() }}">
+                                          data-time="{{ $investment->created_at->toIso8601String() }}">
                                         {{ $investment->created_at }}
                                     </span>
                                 </td>
@@ -91,8 +141,8 @@
                         @empty
 
                             <tr>
-                                <td colspan="8" class="text-center py-4">
-                                    No Investment History Found.
+                                <td colspan="9" class="text-center py-4">
+                                    No Elite Staking History Found.
                                 </td>
                             </tr>
 

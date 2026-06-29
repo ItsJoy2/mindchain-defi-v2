@@ -31,6 +31,14 @@ class TransferController extends Controller
 
             $sender = Auth::user();
 
+            // Transfer block check
+            if ($sender->transfer_block) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Your transfer permission has been blocked. Please contact support.'
+                ], 403);
+            }
+            
             $validator = Validator::make($request->all(), [
                 'user_name' => 'required|exists:users,user_name',
                 'wallet'  => 'required|in:MIND,MUSD,USDT,BMIND',

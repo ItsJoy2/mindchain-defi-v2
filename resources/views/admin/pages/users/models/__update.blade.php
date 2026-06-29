@@ -77,7 +77,7 @@
                         <hr>
 
                         <div class="row">
-                            
+
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">
                                     Ambassador
@@ -118,6 +118,57 @@
                                     </option>
                                     <option value="0" {{ !$user->consultant ? 'selected' : '' }}>
                                         Disabled
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Account Block
+                                </label>
+
+                                <select name="is_block" class="form-select">
+                                    <option value="0" {{ !$user->is_block ? 'selected' : '' }}>
+                                        Unblock
+                                    </option>
+                                    <option value="1" {{ $user->is_block ? 'selected' : '' }}>
+                                        Block
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Transfer Block
+                                </label>
+
+                                <select name="transfer_block" class="form-select">
+                                    <option value="0" {{ !$user->transfer_block ? 'selected' : '' }}>
+                                        Unblock
+                                    </option>
+                                    <option value="1" {{ $user->transfer_block ? 'selected' : '' }}>
+                                        Block
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Withdraw Block
+                                </label>
+
+                                <select name="withdraw_block" class="form-select">
+                                    <option value="0" {{ !$user->withdraw_block ? 'selected' : '' }}>
+                                        Unblock
+                                    </option>
+                                    <option value="1" {{ $user->withdraw_block ? 'selected' : '' }}>
+                                        Block
                                     </option>
                                 </select>
                             </div>

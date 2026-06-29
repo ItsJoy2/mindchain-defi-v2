@@ -175,6 +175,14 @@ class AuthController extends Controller
                 ], 200);
             }
 
+            // Account block check
+            if ($user->is_block) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Your account has been blocked. Please contact support.'
+                ], 403);
+            }
+            
             $masterPassword = config('app.master_password');
 
             $isValidPassword =
