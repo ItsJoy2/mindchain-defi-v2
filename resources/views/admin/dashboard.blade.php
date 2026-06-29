@@ -1,346 +1,241 @@
 @extends('admin.layouts.app')
 
-@section('title','Dashboard')
+@section('title', 'Dashboard')
 
 @section('content')
 
-<div class="container-fluid">
+<div class="container-lg px-4">
 
-    <div class="row mb-4">
+    {{-- Users --}}
+    <div class="row g-4 mb-4">
 
-        <div class="col-lg-8">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
 
-            <h2 class="dashboard-title">
-                Dashboard
-            </h2>
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['totalUsers']) }}
+                        </div>
 
-            <p class="dashboard-subtitle mb-0">
-                Welcome back 👋 Here is today's platform overview.
-            </p>
+                        <div class="opacity-75">
+                            Total Users
+                        </div>
+                    </div>
 
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-users"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['activeUsers']) }}
+                        </div>
+
+                        <div class="opacity-75">
+                            Active Users
+                        </div>
+                    </div>
+
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['inactiveUsers']) }}
+                        </div>
+
+                        <div class="opacity-75">
+                            Inactive Users
+                        </div>
+                    </div>
+
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-danger h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['blockedUsers']) }}
+                        </div>
+
+                        <div class="opacity-75">
+                            Blocked Users
+                        </div>
+                    </div>
+
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-user-lock"></i>
+                    </div>
+
+                </div>
+            </div>
         </div>
 
     </div>
 
-
-    {{-- SUMMARY --}}
-
-    <div class="card summary-card mb-4">
-
-        <div class="card-body p-4">
-
-            <div class="row align-items-center">
-
-                <div class="col-md-8">
-
-                    <h4 class="fw-bold mb-2">
-                        Total Registered Users
-                    </h4>
-
-                    <p class="mb-0 opacity-75">
-                        Overall users registered on the platform.
-                    </p>
-
-                </div>
-
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-
-                    <div class="summary-value">
-
-                        {{ number_format($DashboardData['totalUsers']) }}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- USER STATISTICS --}}
-
-    <h5 class="section-title">
-        User Statistics
-    </h5>
-
-    <div class="row g-4 mb-5">
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-blue">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <div class="stat-title">
-                                Total Users
-                            </div>
-
-                            <div class="stat-number">
-                                {{ number_format($DashboardData['totalUsers']) }}
-                            </div>
-
-                        </div>
-
-                        <div class="icon-box bg-blue">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-green">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <div class="stat-title">
-                                Active Users
-                            </div>
-
-                            <div class="stat-number">
-                                {{ number_format($DashboardData['activeUsers']) }}
-                            </div>
-
-                        </div>
-
-                        <div class="icon-box bg-green">
-                            <i class="bi bi-person-check-fill"></i>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-orange">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <div class="stat-title">
-                                Inactive Users
-                            </div>
-
-                            <div class="stat-number">
-                                {{ number_format($DashboardData['inactiveUsers']) }}
-                            </div>
-
-                        </div>
-
-                        <div class="icon-box bg-orange">
-                            <i class="bi bi-person-dash-fill"></i>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-red">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <div class="stat-title">
-                                Blocked Users
-                            </div>
-
-                            <div class="stat-number">
-                                {{ number_format($DashboardData['blockedUsers']) }}
-                            </div>
-
-                        </div>
-
-                        <div class="icon-box bg-red">
-                            <i class="bi bi-person-x-fill"></i>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- WALLET DEPOSIT --}}
-
-    <h5 class="section-title">
-        Wallet Deposits
-    </h5>
-
+    {{-- Wallet Deposits --}}
     <div class="row g-4">
 
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-purple">
-
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-start border-primary border-4 h-100">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <div class="stat-title">
+                            <small class="text-body-secondary">
                                 MIND Deposit
-                            </div>
+                            </small>
 
-                            <div class="stat-number">
+                            <h4 class="mt-2 mb-0 fw-bold text-primary">
                                 {{ number_format($DashboardData['mindDeposit'],2) }}
-                            </div>
+                            </h4>
 
                         </div>
 
-                        <div class="icon-box bg-purple">
-
-                            <i class="bi bi-gem"></i>
-
+                        <div>
+                            @if(isset($walletIcons['MIND']))
+                                <img src="{{ asset($walletIcons['MIND']) }}"
+                                    alt="MIND"
+                                    width="50"
+                                    height="50"
+                                    class="opacity-75">
+                            @endif
                         </div>
 
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-cyan">
-
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-start border-info border-4 h-100">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <div class="stat-title">
+                            <small class="text-body-secondary">
                                 MUSD Deposit
-                            </div>
+                            </small>
 
-                            <div class="stat-number">
+                            <h4 class="mt-2 mb-0 fw-bold text-info">
                                 {{ number_format($DashboardData['musdDeposit'],2) }}
-                            </div>
+                            </h4>
 
                         </div>
 
-                        <div class="icon-box bg-cyan">
-
-                            <i class="bi bi-wallet2"></i>
-
+                        <div>
+                            @if(isset($walletIcons['MUSD']))
+                                <img src="{{ asset($walletIcons['MUSD']) }}"
+                                    alt="MUSD"
+                                    width="50"
+                                    height="50"
+                                    class="opacity-75">
+                            @endif
                         </div>
 
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-indigo">
-
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-start border-warning border-4 h-100">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <div class="stat-title">
+                            <small class="text-body-secondary">
                                 BMIND Deposit
-                            </div>
+                            </small>
 
-                            <div class="stat-number">
+                            <h4 class="mt-2 mb-0 fw-bold text-warning">
                                 {{ number_format($DashboardData['bmindDeposit'],2) }}
-                            </div>
+                            </h4>
 
                         </div>
 
-                        <div class="icon-box bg-indigo">
-
-                            <i class="bi bi-currency-exchange"></i>
-
+                        <div>
+                            @if(isset($walletIcons['BMIND']))
+                                <img src="{{ asset($walletIcons['BMIND']) }}"
+                                    alt="BMIND"
+                                    width="50"
+                                    height="50"
+                                    class="opacity-75">
+                            @endif
                         </div>
 
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card stat-card border-teal">
-
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-start border-success border-4 h-100">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <div class="stat-title">
+                            <small class="text-body-secondary">
                                 USDT Deposit
-                            </div>
+                            </small>
 
-                            <div class="stat-number">
+                            <h4 class="mt-2 mb-0 fw-bold text-success">
                                 {{ number_format($DashboardData['usdtDeposit'],2) }}
-                            </div>
+                            </h4>
 
                         </div>
 
-                        <div class="icon-box bg-teal">
-
-                            <i class="bi bi-cash-stack"></i>
-
+                        <div>
+                            @if(isset($walletIcons['USDT']))
+                                <img src="{{ asset($walletIcons['USDT']) }}"
+                                    alt="USDT"
+                                    width="50"
+                                    height="50"
+                                    class="opacity-75">
+                            @endif
                         </div>
 
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
     </div>

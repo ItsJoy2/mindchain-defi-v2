@@ -91,7 +91,7 @@
             font-size:12px;
             color:#8c8c8c;
         }
-
+        
    </style>
 
     @stack('auth_styles')
