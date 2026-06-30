@@ -20,15 +20,31 @@
 
                         <input type="search" class="form-control" name="search" value="{{ request('search') }}" placeholder="Search by email or username..." >
 
-                        <select  class="form-select" style="width:180px;" name="status" >
-                            <option value="">All Status</option>
+                        <select class="form-select" style="width:180px;" name="status">
+                            <option value="">All Users</option>
 
-                            <option value="active"  {{ request('status') == 'active' ? 'selected' : '' }} >
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>
                                 Active
                             </option>
 
-                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }} >
+                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>
                                 Inactive
+                            </option>
+
+                            <option value="blocked" {{ request('status') == 'blocked' ? 'selected' : '' }}>
+                                Block User
+                            </option>
+
+                            <option value="transfer_block" {{ request('status') == 'transfer_block' ? 'selected' : '' }}>
+                                Transfer Block
+                            </option>
+
+                            <option value="withdraw_block" {{ request('status') == 'withdraw_block' ? 'selected' : '' }}>
+                                Withdraw Block
+                            </option>
+
+                            <option value="ambassador" {{ request('status') == 'ambassador' ? 'selected' : '' }}>
+                                Ambassador
                             </option>
                         </select>
 

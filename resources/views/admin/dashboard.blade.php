@@ -99,6 +99,99 @@
 
     </div>
 
+    {{-- Membership / Club Users --}}
+    <div class="row g-4 mb-4">
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['ambassadorUsers']) }}
+                        </div>
+
+                        <div class="opacity-75">
+                            Ambassador Users
+                        </div>
+                    </div>
+
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['eliteClubUsers']) }}
+                        </div>
+
+                        <div class="opacity-75">
+                            Elite Club Users
+                        </div>
+                    </div>
+
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-crown"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['eliteV2Users']) }}
+                        </div>
+
+                        <div class="opacity-75">
+                            Elite V2 Users
+                        </div>
+                    </div>
+
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-gem"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <div class="fs-2 fw-bold">
+                            {{ number_format($DashboardData['angelClubUsers']) }}
+                        </div>
+
+                        <div class="opacity-75">
+                            Angel Club Users
+                        </div>
+                    </div>
+
+                    <div class="display-5 opacity-50">
+                        <i class="fas fa-feather-alt"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     {{-- Wallet Deposits --}}
     <div class="row g-4">
 

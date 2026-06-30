@@ -23,22 +23,43 @@ class UserController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('email', 'like', "%{$search}%")
-                    ->orWhere('user_name', 'like', "%{$search}%");
+                ->orWhere('user_name', 'like', "%{$search}%");
             });
         }
 
-        // Active / Inactive filter
+       // Filter
         if ($request->filled('status')) {
-            if ($request->status === 'active') {
-                $query->where('status', 1);
-            }
 
-            if ($request->status === 'inactive') {
-                $query->where('status', 0);
+            switch ($request->status) {
+
+                case 'active':
+                    $query->where('status', 1);
+                    break;
+
+                case 'inactive':
+                    $query->where('status', 0);
+                    break;
+
+                case 'blocked':
+                    $query->where('is_block', 1);
+                    break;
+
+                case 'transfer_block':
+                    $query->where('transfer_block', 1);
+                    break;
+
+                case 'withdraw_block':
+                    $query->where('withdraw_block', 1);
+                    break;
+
+                case 'ambassador':
+                    $query->where('ambassador', 1);
+                    break;
             }
         }
-
-        $users = $query->latest()->paginate(20)->withQueryString();
+        $users = $query->latest()
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.pages.users.index', compact('users'));
     }

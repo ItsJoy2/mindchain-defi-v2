@@ -15,7 +15,12 @@ class DashboardController extends Controller
             COUNT(CASE WHEN is_admin = 0 THEN 1 END) as totalUsers,
             COUNT(CASE WHEN is_admin = 0 AND status = 1 THEN 1 END) as activeUsers,
             COUNT(CASE WHEN is_admin = 0 AND status = 0 THEN 1 END) as inactiveUsers,
-            COUNT(CASE WHEN is_admin = 0 AND is_block = 1 THEN 1 END) as blockedUsers
+            COUNT(CASE WHEN is_admin = 0 AND is_block = 1 THEN 1 END) as blockedUsers,
+
+            COUNT(CASE WHEN is_admin = 0 AND ambassador = 1 THEN 1 END) as ambassadorUsers,
+            COUNT(CASE WHEN is_admin = 0 AND elite_club = 1 THEN 1 END) as eliteClubUsers,
+            COUNT(CASE WHEN is_admin = 0 AND is_elite_v2 = 1 THEN 1 END) as eliteV2Users,
+            COUNT(CASE WHEN is_admin = 0 AND angel_club = 1 THEN 1 END) as angelClubUsers
         ")->first();
 
         $depositStats = DB::table('transactions')
@@ -37,6 +42,11 @@ class DashboardController extends Controller
             'activeUsers'   => $userStats->activeUsers,
             'inactiveUsers' => $userStats->inactiveUsers,
             'blockedUsers'  => $userStats->blockedUsers,
+
+            'ambassadorUsers'  => $userStats->ambassadorUsers,
+            'eliteClubUsers'   => $userStats->eliteClubUsers,
+            'eliteV2Users'     => $userStats->eliteV2Users,
+            'angelClubUsers'   => $userStats->angelClubUsers,
 
             'mindDeposit'   => $depositStats->mindDeposit ?? 0,
             'musdDeposit'   => $depositStats->musdDeposit ?? 0,
