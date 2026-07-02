@@ -27,6 +27,7 @@ class TransactionsController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('users.user_name', 'like', "%{$search}%")
                     ->orWhere('users.email', 'like', "%{$search}%")
+                    ->orWhere('transactions.method', 'like', "%{$search}%")
                     ->orWhere('transactions.description', 'like', "%{$search}%")
                     ->orWhere('transactions.txn_id', 'like', "%{$search}%");
             });
