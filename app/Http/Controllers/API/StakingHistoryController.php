@@ -277,7 +277,7 @@ class StakingHistoryController extends Controller
                         'received_days'  => (int) $row->received_days,
                         'daily'          => (float) $row->daily,
                         'status'         => $row->status == 1 ? 'Running' : 'Expired',
-                        'created_at'     => $row->created_at->format('d M Y'),
+                        'created_at'     => $row->created_at,
                     ];
                 }),
 
