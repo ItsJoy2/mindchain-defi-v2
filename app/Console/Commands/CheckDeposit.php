@@ -47,10 +47,14 @@ class CheckDeposit extends Command
                 |--------------------------------------------------------------------------
                 */
 
-                $paymentResponse = PaymentGatewayService::client()
-                    ->get(config('payment_gateway.api_url')
-                    . '/api/payments/'
-                    . $deposit->invoice_id);
+            $payload = [
+                'id' => $deposit->invoice_id,
+            ];
+
+            $paymentResponse = PaymentGatewayService::client($payload)
+                ->get(
+                    config('payment_gateway.api_url') . '/api/payments/' . $deposit->invoice_id
+                );
 
                 if (!$paymentResponse->successful()) {
                     throw new \Exception(

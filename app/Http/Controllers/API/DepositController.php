@@ -73,11 +73,6 @@ class DepositController extends Controller
                 'amount'      => $request->amount,
             ], $walletConfig);
 
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT GATEWAY REQUEST
-            |--------------------------------------------------------------------------
-            */
 
             $response = PaymentGatewayService::client($gatewayData)
                 ->post(
@@ -101,12 +96,6 @@ class DepositController extends Controller
                     'message' => $result['message'] ?? 'Gateway error',
                 ]);
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | SAVE DEPOSIT JOB
-            |--------------------------------------------------------------------------
-            */
 
             $depositJob = DepositJob::create([
                 'user_id'          => $user->id,
@@ -155,14 +144,20 @@ class DepositController extends Controller
 
         try {
 
-            $response = PaymentGatewayService::client()
-                ->get(config('payment_gateway.api_url')
-                . '/api/payments/' . $invoiceId);
+            $payload = [
+                'id' => $invoiceId,
+            ];
+
+            $response = PaymentGatewayService::client($payload)
+                ->get(
+                    config('payment_gateway.api_url') . '/api/payments/' . $invoiceId
+                );
 
             if (!$response->successful()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Gateway request failed',
+                    'error' => $response->body(),
                     'data' => null
                 ], $response->status());
             }
