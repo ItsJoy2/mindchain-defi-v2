@@ -76,7 +76,7 @@ class DepositController extends Controller
 
             $response = PaymentGatewayService::client($gatewayData)
                 ->post(
-                    config('payment_gateway.api_url') . '/api/create_invoice',
+                    config('payment_gateway.api_url') . '/api/v1/create-invoice',
                     $gatewayData
                 );
 
@@ -150,7 +150,7 @@ class DepositController extends Controller
 
             $response = PaymentGatewayService::client($payload)
                 ->get(
-                    config('payment_gateway.api_url') . '/api/payments/' . $invoiceId
+                    config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId
                 );
 
             if (!$response->successful()) {
