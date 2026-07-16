@@ -79,7 +79,7 @@ class DepositController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $response = PaymentGatewayService::client()
+            $response = PaymentGatewayService::client($gatewayData)
                 ->post(
                     config('payment_gateway.api_url') . '/api/create_invoice',
                     $gatewayData
@@ -87,18 +87,18 @@ class DepositController extends Controller
 
             if (!$response->successful()) {
                 return response()->json([
-                    'status' => false,
+                    'status'  => false,
                     'message' => 'Gateway request failed',
-                    'error'   => $response->body()
+                    'error'   => $response->body(),
                 ]);
             }
 
             $result = $response->json();
 
-            if (!isset($result['status']) || !$result['status']) {
+            if (!($result['status'] ?? false)) {
                 return response()->json([
-                    'status' => false,
-                    'message' => $result['message'] ?? 'Gateway error'
+                    'status'  => false,
+                    'message' => $result['message'] ?? 'Gateway error',
                 ]);
             }
 
@@ -122,9 +122,9 @@ class DepositController extends Controller
             ]);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Invoice created successfully',
-                'data' => [
+                'data'    => [
                     'invoice_id' => $depositJob->invoice_id,
                     'address'    => $depositJob->wallet_address,
                     'amount'     => $depositJob->amount,
@@ -137,8 +137,8 @@ class DepositController extends Controller
         } catch (\Throwable $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
+                'status'  => false,
+                'message' => $e->getMessage(),
             ]);
         }
     }

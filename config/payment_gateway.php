@@ -4,8 +4,8 @@ return [
 
     'api_url' => env('PAYMENT_GATEWAY_URL'),
 
-    'license_key' => env('PAYMENT_GATEWAY_LICENSE'),
+    'merchant_id' => env('MERCHANT_ID'),
 
-    'secret' => env('PAYMENT_GATEWAY_SECRET'),
+    'secret' => env('SECRET'),
 
 ];
