@@ -74,10 +74,10 @@ class DepositController extends Controller
             ], $walletConfig);
 
 
-            $response = PaymentGatewayService::client($gatewayData)
+            $response = PaymentGatewayService::client()
                 ->post(
-                    config('payment_gateway.api_url') . '/api/v1/create-invoice',
-                    $gatewayData
+                    config('payment_gateway.api_url').'/api/v1/create-invoice',
+                    PaymentGatewayService::payload($gatewayData)
                 );
 
             if (!$response->successful()) {
@@ -148,21 +148,22 @@ class DepositController extends Controller
                 'id' => $invoiceId,
             ];
 
-            $response = PaymentGatewayService::client($payload)
+            $paymentResponse = PaymentGatewayService::client()
                 ->get(
-                    config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId
+                    config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId,
+                    PaymentGatewayService::payload($payload)
                 );
 
-            if (!$response->successful()) {
+            if (!$paymentResponse->successful()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Gateway request failed',
-                    'error' => $response->body(),
+                    'error' => $paymentResponse->body(),
                     'data' => null
-                ], $response->status());
+                ], $paymentResponse->status());
             }
 
-            $res = $response->json();
+            $res = $paymentResponse->json();
 
             return response()->json([
                 'status' => true,

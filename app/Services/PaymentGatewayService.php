@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Http;
 
 class PaymentGatewayService
 {
-    /**
-     * Sort payload recursively
-     */
     protected static function sortRecursive(array $array): array
     {
         foreach ($array as &$value) {
@@ -22,16 +19,22 @@ class PaymentGatewayService
         return $array;
     }
 
-    /**
-     * Generate timestamp + signature
-     */
-    public static function generateSignature(array $payload = []): array
+    protected static function generateSignature(array $payload = []): array
     {
-        $timestamp = time();
+        $merchantId = config('payment_gateway.merchant_id');
+        $timestamp  = time();
+
+        unset(
+            $payload['merchant_id'],
+            $payload['timestamp'],
+            $payload['signature']
+        );
 
         $payload = self::sortRecursive($payload);
 
-        $message = $timestamp . json_encode($payload, JSON_UNESCAPED_SLASHES);
+        $message = $merchantId
+            . $timestamp
+            . json_encode($payload, JSON_UNESCAPED_SLASHES);
 
         $signature = hash_hmac(
             'sha256',
@@ -40,34 +43,36 @@ class PaymentGatewayService
         );
 
         return [
-            'timestamp' => $timestamp,
-            'signature' => $signature,
+            'merchant_id' => $merchantId,
+            'timestamp'   => $timestamp,
+            'signature'   => $signature,
         ];
     }
 
     /**
-     * Request headers for API
+     * POST request body
      */
-    public static function headers(array $payload = []): array
+    public static function payload(array $payload = []): array
     {
-        $auth = self::generateSignature($payload);
-
-        return [
-            'X-MERCHANT-ID' => config('payment_gateway.merchant_id'),
-            'X-TIMESTAMP'   => $auth['timestamp'],
-            'X-SIGNATURE'   => $auth['signature'],
-            'Accept'        => 'application/json',
-            'Content-Type'  => 'application/json',
-        ];
+        return array_merge(
+            $payload,
+            self::generateSignature($payload)
+        );
     }
 
     /**
-     * HTTP client
+     * GET query parameters
      */
-    public static function client(array $payload = [])
+    public static function auth(array $payload = []): array
     {
-        return Http::timeout(50)
-            ->retry(2, 100)
-            ->withHeaders(self::headers($payload));
+        return self::generateSignature($payload);
+    }
+
+    public static function client()
+    {
+        return Http::asJson()
+            ->acceptJson()
+            ->timeout(50)
+            ->retry(2, 100);
     }
 }
