@@ -53,12 +53,13 @@ class CheckDeposit extends Command
                     'id' => $invoiceId,
                 ];
 
-                $paymentResponse = PaymentGatewayService::client()
-                    ->get(
-                        config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId,
+                $paymentResponse = PaymentGatewayService::client()->get(
+                    config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId,
+                    array_merge(
+                        $payload,
                         PaymentGatewayService::auth($payload)
-                    );
-
+                    )
+                );
                 if (!$paymentResponse->successful()) {
                     throw new \Exception(
                         'Gateway HTTP ' .
