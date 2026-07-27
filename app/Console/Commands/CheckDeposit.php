@@ -46,25 +46,29 @@ class CheckDeposit extends Command
                 |--------------------------------------------------------------------------
                 */
 
+
                 $invoiceId = $deposit->invoice_id;
 
-                $response = PaymentGatewayService::client()->get(
-                    config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId,
-                    PaymentGatewayService::auth([
-                        'id' => $invoiceId
-                    ])
-                );
+                $payload = [
+                    'id' => $invoiceId,
+                ];
 
-                if (!$response->successful()) {
+                $paymentResponse = PaymentGatewayService::client()
+                    ->get(
+                        config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId,
+                        PaymentGatewayService::auth($payload)
+                    );
+
+                if (!$paymentResponse->successful()) {
                     throw new \Exception(
                         'Gateway HTTP ' .
-                        $response->status() .
+                        $paymentResponse->status() .
                         ' : ' .
-                        $response->body()
+                        $paymentResponse->body()
                     );
                 }
 
-                $gateway = $response->json();
+                $gateway = $paymentResponse->json();
 
                 if (!($gateway['status'] ?? false)) {
                     throw new \Exception(
@@ -74,10 +78,7 @@ class CheckDeposit extends Command
 
                 $data = $gateway['data'] ?? [];
 
-                $status = strtolower(
-                    $data['payment_status'] ?? 'pending'
-                );
-
+                $status = strtolower($data['payment_status'] ?? 'pending');
                 /*
                 |--------------------------------------------------------------------------
                 | Pending
