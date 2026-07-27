@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class CheckDeposit extends Command
 {
-    protected $signature = 'deposit:check';
+    protected $signature = 'deposit:check2';
     protected $description = 'Check pending deposits and process transactions';
 
     public function handle()
@@ -124,7 +124,7 @@ class CheckDeposit extends Command
                 }
 
                 // CASE 2: balance > 0 => transaction create
-                
+
                 $exists = Transaction::where('txn_id', $deposit->invoice_id)->exists();
 
                 if (!$exists) {
