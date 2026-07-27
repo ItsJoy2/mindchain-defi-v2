@@ -134,12 +134,9 @@ class CheckDeposit extends Command
                 |--------------------------------------------------------------------------
                 */
 
-                $amount = (float)(
-                    $data['balance']
-                    ?? $data['amount']
-                    ?? $data['received_amount']
-                    ?? $deposit->amount
-                );
+                $amount = (float) data_get($paymentResponse, 'data.amount', 0);
+
+                $txHash = data_get($paymentResponse, 'data.tx_hash');
 
                 /*
                 |--------------------------------------------------------------------------
@@ -151,7 +148,7 @@ class CheckDeposit extends Command
 
                     Transaction::create([
                         'user_id'     => $deposit->user_id,
-                        'wallet_type' => strtoupper($deposit->wallet),
+                        'wallet' => strtoupper($deposit->wallet),
                         'amount'      => $amount,
                         'type'        => 'Credit',
                         'method'      => 'Deposit',
