@@ -57,7 +57,9 @@ class WebhookController extends Controller
                 throw new \Exception('Invalid amount.');
             }
 
-            $exists = Transaction::where('txn_id', $txHash)->lockForUpdate()->exists();
+            $exists = Transaction::where('txn_id', $deposit->invoice_id)
+                ->lockForUpdate()
+                ->exists();
 
             if (!$exists) {
 
@@ -67,7 +69,7 @@ class WebhookController extends Controller
                     'amount'      => $amount,
                     'type'        => 'Credit',
                     'method'      => 'Deposit',
-                    'txn_id'      => $txHash,
+                    'txn_id'      => $deposit->invoice_id,
                     'description' => "{$amount} " . strtoupper($deposit->wallet) . " deposited via gateway",
                     'status'      => 'Approved',
                 ]);
