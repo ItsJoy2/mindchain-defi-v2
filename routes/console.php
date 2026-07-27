@@ -32,4 +32,4 @@ Schedule::command('musd:staking-daily')->dailyAt('00:25');
 Schedule::command('angel:daily-bonus')->dailyAt('00:30');
 
 //check pending deposits
-Schedule::command('deposit:check')->everyMinute()->withoutOverlapping();
+// Schedule::command('deposit:check')->everyMinute()->withoutOverlapping();

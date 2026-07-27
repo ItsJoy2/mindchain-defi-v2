@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\DepositJob;
 use App\Models\Transaction;
-use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,10 +16,13 @@ class WebhookController extends Controller
 
         try {
 
-            $invoiceId = $request->invoice_id;
+            $invoiceId = trim($request->invoice_id);
+            $status    = strtolower((string)$request->status);
+            $amount    = (float)$request->amount;
+            $txHash    = $request->txHash;
 
             if (!$invoiceId) {
-                throw new \Exception('Invoice ID is required');
+                throw new \Exception('Invoice ID is required.');
             }
 
             $deposit = DepositJob::where('invoice_id', $invoiceId)
@@ -28,20 +30,8 @@ class WebhookController extends Controller
                 ->first();
 
             if (!$deposit) {
-
-                DB::rollBack();
-
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Invoice not found'
-                ], 404);
+                throw new \Exception('Deposit not found.');
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Already Processed
-            |--------------------------------------------------------------------------
-            */
 
             if ($deposit->status === 'Completed') {
 
@@ -49,191 +39,53 @@ class WebhookController extends Controller
 
                 return response()->json([
                     'status' => true,
-                    'message' => 'Already processed'
+                    'message' => 'Already processed.'
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Payment Status Check
-            |--------------------------------------------------------------------------
-            */
-
-            $paymentPayload = [
-                'invoice_id' => $invoiceId
-            ];
-
-            $paymentResponse = PaymentGatewayService::client(
-                $paymentPayload
-            )->get(
-                config('payment_gateway.api_url')
-                . '/api/payments/'
-                . $invoiceId
-            );
-
-            if (!$paymentResponse->successful()) {
-                throw new \Exception(
-                    'Unable to verify payment status'
-                );
-            }
-
-            $paymentData = $paymentResponse->json();
-
-            $paymentStatus = strtolower(
-                $paymentData['payment_status']
-                ?? 'pending'
-            );
-
-            if ($paymentStatus !== 'completed') {
+            if (!in_array($status, ['completed', 'true', '1'])) {
 
                 DB::commit();
 
                 return response()->json([
                     'status' => false,
-                    'message' => 'Payment not completed',
-                    'payment_status' => $paymentStatus
+                    'message' => 'Payment not completed.'
                 ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get Amount
-            |--------------------------------------------------------------------------
-            */
-
-            $amount = (float) (
-                $paymentData['received_amount']
-                ?? $paymentData['amount']
-                ?? 0
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Fallback Balance Check
-            |--------------------------------------------------------------------------
-            */
-
-            if ($amount <= 0) {
-
-                $balancePayload = [
-                    'chain_id' => $deposit->chain_id,
-                    'type'     => $deposit->type,
-                    'address'  => $deposit->wallet_address,
-                ];
-
-                if (!empty($deposit->contract_address)) {
-                    $balancePayload['contract_address']
-                        = $deposit->contract_address;
-                }
-
-                $balanceResponse = PaymentGatewayService::client(
-                    $balancePayload
-                )->get(
-                    config('payment_gateway.api_url')
-                    . '/api/check-balance',
-                    $balancePayload
-                );
-
-                if (!$balanceResponse->successful()) {
-                    throw new \Exception(
-                        'Balance check failed'
-                    );
-                }
-
-                $amount = (float) trim(
-                    $balanceResponse->body()
-                );
             }
 
             if ($amount <= 0) {
-                throw new \Exception(
-                    'Wallet balance is zero'
-                );
+                throw new \Exception('Invalid amount.');
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Duplicate Transaction Check
-            |--------------------------------------------------------------------------
-            */
+            $exists = Transaction::where('txn_id', $txHash)->lockForUpdate()->exists();
 
-            $exists = Transaction::where(
-                'txn_id',
-                $deposit->invoice_id
-            )->lockForUpdate()->exists();
+            if (!$exists) {
 
-            if ($exists) {
-
-                $deposit->update([
-                    'status'  => 'Completed',
-                    'paid_at' => now(),
-                    'tx_hash' => $paymentData['tx_hash'] ?? null,
-                    'gateway_response' => $paymentData,
-                ]);
-
-                DB::commit();
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Already credited'
+                Transaction::create([
+                    'user_id'     => $deposit->user_id,
+                    'wallet'      => strtoupper($deposit->wallet),
+                    'amount'      => $amount,
+                    'type'        => 'Credit',
+                    'method'      => 'Deposit',
+                    'txn_id'      => $txHash,
+                    'description' => "{$amount} " . strtoupper($deposit->wallet) . " deposited via gateway",
+                    'status'      => 'Approved',
                 ]);
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Create Transaction
-            |--------------------------------------------------------------------------
-            */
-
-            Transaction::create([
-                'user_id'     => $deposit->user_id,
-                'wallet_type' => strtoupper($deposit->wallet),
-                'amount'      => $amount,
-                'type'        => 'Credit',
-                'method'      => 'Deposit',
-                'txn_id'      => $deposit->invoice_id,
-                'description' => $amount . ' '
-                    . strtoupper($deposit->wallet)
-                    . ' deposited via payment gateway',
-                'status'      => 'Approved',
-            ]);
-
-
-            // Credit User Wallet
-            $user = $deposit->user;
-
-            if ($user) {
-
-                $wallet = strtolower($deposit->wallet);
-
-                if (
-                    in_array(
-                        $wallet,
-                        ['mind', 'musd', 'usdt', 'bmind']
-                    )
-                ) {
-                    $user->increment(
-                        $wallet,
-                        $amount
-                    );
-                }
-            }
-
-            //Complete Deposit
 
             $deposit->update([
                 'status'           => 'Completed',
-                'tx_hash'          => $paymentData['tx_hash'] ?? null,
                 'paid_at'          => now(),
-                'gateway_response' => $paymentData,
+                'tx_hash'          => $txHash,
+                'gateway_response' => $request->all(),
             ]);
 
             DB::commit();
 
             return response()->json([
-                'status'  => true,
-                'message' => 'Deposit credited successfully',
-                'amount'  => $amount
+                'status' => true,
+                'message' => 'Deposit credited successfully.',
+                'amount' => $amount,
             ]);
 
         } catch (\Throwable $e) {
@@ -243,8 +95,8 @@ class WebhookController extends Controller
             report($e);
 
             return response()->json([
-                'status'  => false,
-                'message' => $e->getMessage()
+                'status' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
