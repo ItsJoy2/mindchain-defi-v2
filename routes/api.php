@@ -82,4 +82,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('deposit/{invoiceId}', [DepositController::class, 'statusShow']);
 });
 
-Route::post('check-deposit', [WebhookController::class, 'handle']);
+Route::post('check-deposit/{userId}', [WebhookController::class, 'handle']);
