@@ -5,27 +5,60 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\DepositJob;
 use App\Models\Transaction;
+use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class WebhookController extends Controller
 {
-    public function handle(Request $request)
+    public function handle(Request $request, $userId)
     {
         DB::beginTransaction();
 
         try {
 
-            $invoiceId = trim($request->invoice_id);
-            $status    = strtolower((string)$request->status);
-            $amount    = (float)$request->amount;
-            $txHash    = $request->txHash;
+            $txHash = trim($request->txHash);
 
-            if (!$invoiceId) {
-                throw new \Exception('Invoice ID is required.');
+            if (!$txHash) {
+                throw new \Exception('txHash is required.');
             }
 
-            $deposit = DepositJob::where('invoice_id', $invoiceId)
+
+
+            $params = PaymentGatewayService::auth([
+                'txHash' => $txHash,
+            ]);
+
+            $response = PaymentGatewayService::client()->get(
+                rtrim(config('payment_gateway.base_url'), '/') . "api/v1/payments/{$txHash}",
+                $params
+            );
+
+
+            if (!$response->successful()) {
+                throw new \Exception('Gateway request failed.');
+            }
+
+            $payment = $response->json();
+
+            if (!($payment['status'] ?? false)) {
+                throw new \Exception('Invalid payment response.');
+            }
+
+            if (!in_array(strtolower($payment['payment_status']), ['completed'])) {
+
+                DB::commit();
+
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Payment not completed.',
+                ]);
+            }
+
+
+            $deposit = DepositJob::where('invoice_id', $payment['invoice_id'])
+                ->where('user_id', $userId)
                 ->lockForUpdate()
                 ->first();
 
@@ -38,26 +71,13 @@ class WebhookController extends Controller
                 DB::commit();
 
                 return response()->json([
-                    'status' => true,
-                    'message' => 'Already processed.'
+                    'status'  => true,
+                    'message' => 'Already processed.',
                 ]);
             }
 
-            if (!in_array($status, ['completed', 'true', '1'])) {
 
-                DB::commit();
-
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Payment not completed.'
-                ]);
-            }
-
-            if ($amount <= 0) {
-                throw new \Exception('Invalid amount.');
-            }
-
-            $exists = Transaction::where('txn_id', $deposit->invoice_id)
+            $exists = Transaction::where('txn_id', $txHash)
                 ->lockForUpdate()
                 ->exists();
 
@@ -65,29 +85,29 @@ class WebhookController extends Controller
 
                 Transaction::create([
                     'user_id'     => $deposit->user_id,
-                    'wallet'      => strtoupper($deposit->wallet),
-                    'amount'      => $amount,
+                    'wallet'      => strtoupper($payment['token']),
+                    'amount'      => $payment['amount'],
                     'type'        => 'Credit',
                     'method'      => 'Deposit',
-                    'txn_id'      => $deposit->invoice_id,
-                    'description' => "{$amount} " . strtoupper($deposit->wallet) . " deposited via gateway",
+                    'txn_id'      => $txHash,
+                    'description' => $payment['amount'] . ' ' . strtoupper($payment['token_name']) . ' deposited via gateway',
                     'status'      => 'Approved',
                 ]);
             }
+
 
             $deposit->update([
                 'status'           => 'Completed',
                 'paid_at'          => now(),
                 'tx_hash'          => $txHash,
-                'gateway_response' => $request->all(),
+                'gateway_response' => $payment,
             ]);
 
             DB::commit();
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Deposit credited successfully.',
-                'amount' => $amount,
             ]);
 
         } catch (\Throwable $e) {
@@ -97,7 +117,7 @@ class WebhookController extends Controller
             report($e);
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => $e->getMessage(),
             ], 500);
         }
