@@ -81,16 +81,6 @@ class WebhookController extends Controller
                 ->first();
 
 
-            // if ((float)$deposit->amount != (float)$payment['amount']) {
-            //     throw new \Exception('Amount mismatch.');
-            // }
-
-
-            // if (strtoupper($deposit->wallet) != strtoupper($payment['token'])) {
-            //     throw new \Exception('Wallet mismatch.');
-            // }
-
-
             Transaction::create([
                 'user_id'     => $deposit->user_id,
                 'wallet'      => strtoupper($payment['token']),

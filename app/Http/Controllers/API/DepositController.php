@@ -132,53 +132,56 @@ class DepositController extends Controller
         }
     }
 
-    public function statusShow($invoiceId)
+    public function statusShow($txHash)
     {
-        if (!$invoiceId) {
+        if (empty($txHash)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Invoice ID is required',
-                'data' => null
+                'message' => 'Transaction hash is required',
+                'data' => null,
             ], 422);
         }
 
         try {
 
-            $payload = [
-                'id' => $invoiceId,
-            ];
+            $params = PaymentGatewayService::auth([
+                'txHash' => $txHash,
+            ]);
 
-            $paymentResponse = PaymentGatewayService::client()
-                ->get(
-                    config('payment_gateway.api_url') . '/api/v1/payments/' . $invoiceId,
-                    PaymentGatewayService::payload($payload)
-                );
+            $paymentResponse = PaymentGatewayService::client()->get(
+                rtrim(config('payment_gateway.api_url'), '/') . "/api/v1/payments/{$txHash}",
+                $params
+            );
 
             if (!$paymentResponse->successful()) {
                 return response()->json([
-                    'status' => false,
+                    'status'  => false,
                     'message' => 'Gateway request failed',
-                    'error' => $paymentResponse->body(),
-                    'data' => null
+                    'error'   => $paymentResponse->body(),
+                    'data'    => null,
                 ], $paymentResponse->status());
             }
 
             $res = $paymentResponse->json();
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Payment status fetched successfully',
-                'data' => [
+                'data'    => [
+                    'tx_hash'        => $txHash,
+                    'invoice_id'     => $res['invoice_id'] ?? null,
                     'payment_status' => strtolower($res['payment_status'] ?? 'pending'),
-                ]
+                    'amount'         => $res['amount'] ?? null,
+                    'wallet'         => $res['token'] ?? ($res['token_name'] ?? null),
+                ],
             ]);
 
         } catch (\Throwable $e) {
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => $e->getMessage(),
-                'data' => null
+                'data'    => null,
             ], 500);
         }
     }

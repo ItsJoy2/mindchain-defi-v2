@@ -79,7 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('deposit/create', [DepositController::class, 'createDeposit']);
-    Route::get('deposit/{invoiceId}', [DepositController::class, 'statusShow']);
+    Route::get('deposit/{txHash}', [DepositController::class, 'statusShow']);
 });
 
 Route::post('check-deposit/{userId}', [WebhookController::class, 'handle']);
