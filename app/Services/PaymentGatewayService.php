@@ -65,9 +65,11 @@ class PaymentGatewayService
      */
     public static function auth(array $payload = []): array
     {
-        return self::generateSignature($payload);
+        return array_merge(
+            $payload,
+            self::generateSignature($payload)
+        );
     }
-
     public static function client()
     {
         return Http::asJson()
