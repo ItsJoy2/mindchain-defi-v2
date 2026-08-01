@@ -168,11 +168,7 @@ class DepositController extends Controller
                 'status'  => true,
                 'message' => 'Payment status fetched successfully',
                 'data'    => [
-                    'tx_hash'        => $txHash,
-                    'invoice_id'     => $res['invoice_id'] ?? null,
                     'payment_status' => strtolower($res['payment_status'] ?? 'pending'),
-                    'amount'         => $res['amount'] ?? null,
-                    'wallet'         => $res['token'] ?? ($res['token_name'] ?? null),
                 ],
             ]);
 
