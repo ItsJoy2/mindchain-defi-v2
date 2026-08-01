@@ -69,7 +69,7 @@ class DepositController extends Controller
             $walletConfig = $wallets[$request->wallet];
 
             $gatewayData = array_merge([
-                'webhook_url' => url('/api/check-deposit'),
+                'webhook_url' => url("/api/check-deposit/{$user->id}"),
                 'amount'      => $request->amount,
             ], $walletConfig);
 
