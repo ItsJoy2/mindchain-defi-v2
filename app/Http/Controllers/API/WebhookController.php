@@ -23,11 +23,7 @@ class WebhookController extends Controller
                 throw new \Exception('txHash is required.');
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Duplicate Webhook Check
-            |--------------------------------------------------------------------------
-            */
+
 
             $already = DepositJob::where('tx_hash', $txHash)
                 ->where('status', 'Completed')
@@ -44,11 +40,6 @@ class WebhookController extends Controller
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Verify Payment From Gateway
-            |--------------------------------------------------------------------------
-            */
 
             $params = PaymentGatewayService::auth([
                 'txHash' => $txHash,
@@ -79,11 +70,7 @@ class WebhookController extends Controller
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Find Deposit Job
-            |--------------------------------------------------------------------------
-            */
+
 
             $deposit = DepositJob::where('invoice_id', $payment['invoice_id'])
                 ->where('user_id', $userId)
@@ -92,6 +79,12 @@ class WebhookController extends Controller
 
             if (!$deposit) {
                 throw new \Exception('Deposit not found.');
+            }
+
+            if ($deposit->tx_hash !== $txHash) {
+
+                $deposit->tx_hash = $txHash;
+                $deposit->save();
             }
 
             if ($deposit->status === 'Completed') {
@@ -104,43 +97,15 @@ class WebhookController extends Controller
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Save txHash Immediately
-            |--------------------------------------------------------------------------
-            */
-
-            if (empty($deposit->tx_hash)) {
-
-                $deposit->tx_hash = $txHash;
-                $deposit->save();
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Verify Amount
-            |--------------------------------------------------------------------------
-            */
 
             if ((float) $deposit->amount != (float) $payment['amount']) {
                 throw new \Exception('Amount mismatch.');
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Verify Wallet
-            |--------------------------------------------------------------------------
-            */
-
             if (strtoupper($deposit->wallet) != strtoupper($payment['token_name'])) {
                 throw new \Exception('Wallet mismatch.');
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Prevent Duplicate Transaction
-            |--------------------------------------------------------------------------
-            */
 
             $exists = Transaction::where('txn_id', $txHash)
                 ->lockForUpdate()
@@ -160,11 +125,6 @@ class WebhookController extends Controller
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Complete Deposit
-            |--------------------------------------------------------------------------
-            */
 
             $deposit->update([
                 'status'           => 'Completed',
