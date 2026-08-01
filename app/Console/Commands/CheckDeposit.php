@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class CheckDeposit extends Command
 {
-    protected $signature = 'deposit:check2';
+    protected $signature = 'deposit:check';
     protected $description = 'Check pending deposits and process transactions';
 
     public function handle()
