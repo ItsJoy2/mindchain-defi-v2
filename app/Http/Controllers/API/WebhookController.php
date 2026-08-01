@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
@@ -64,9 +65,14 @@ class WebhookController extends Controller
             ]);
 
             $response = PaymentGatewayService::client()->get(
-                rtrim(config('payment_gateway.base_url'), '/') . "/api/v1/payments/{$txHash}",
+                rtrim(config('payment_gateway.api_url'), '/') . "/api/v1/payments/{$txHash}",
                 $params
             );
+
+            Log::info('Gateway Response', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
 
             if (!$response->successful()) {
                 throw new \Exception('Gateway request failed.');
