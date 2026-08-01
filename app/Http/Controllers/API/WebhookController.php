@@ -23,7 +23,25 @@ class WebhookController extends Controller
                 throw new \Exception('txHash is required.');
             }
 
+            DepositJob::where('user_id', $userId)
+                ->whereNull('tx_hash')
+                ->latest('id')
+                ->update([
+                    'tx_hash' => $txHash,
+                ]);
 
+            DB::beginTransaction();
+
+            try {
+
+                DB::commit();
+
+            } catch (\Throwable $e) {
+
+                DB::rollBack();
+
+                throw $e;
+            }
 
             $already = DepositJob::where('tx_hash', $txHash)
                 ->where('status', 'Completed')
