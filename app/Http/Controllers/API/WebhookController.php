@@ -8,7 +8,6 @@ use App\Models\Transaction;
 use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 
 class WebhookController extends Controller
 {
@@ -18,23 +17,47 @@ class WebhookController extends Controller
 
         try {
 
-            $txHash = trim($request->txHash);
+            $txHash = trim((string) $request->input('txHash'));
 
-            if (!$txHash) {
+            if (empty($txHash)) {
                 throw new \Exception('txHash is required.');
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Duplicate Webhook Check
+            |--------------------------------------------------------------------------
+            */
 
+            $already = DepositJob::where('tx_hash', $txHash)
+                ->where('status', 'Completed')
+                ->lockForUpdate()
+                ->first();
+
+            if ($already) {
+
+                DB::commit();
+
+                return response()->json([
+                    'status'  => true,
+                    'message' => 'Already processed.',
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Verify Payment From Gateway
+            |--------------------------------------------------------------------------
+            */
 
             $params = PaymentGatewayService::auth([
                 'txHash' => $txHash,
             ]);
 
             $response = PaymentGatewayService::client()->get(
-                rtrim(config('payment_gateway.base_url'), '/') . "api/v1/payments/{$txHash}",
+                rtrim(config('payment_gateway.base_url'), '/') . "/api/v1/payments/{$txHash}",
                 $params
             );
-
 
             if (!$response->successful()) {
                 throw new \Exception('Gateway request failed.');
@@ -43,10 +66,10 @@ class WebhookController extends Controller
             $payment = $response->json();
 
             if (!($payment['status'] ?? false)) {
-                throw new \Exception('Invalid payment response.');
+                throw new \Exception($payment['message'] ?? 'Invalid payment response.');
             }
 
-            if (!in_array(strtolower($payment['payment_status']), ['completed'])) {
+            if (strtolower($payment['payment_status']) !== 'completed') {
 
                 DB::commit();
 
@@ -56,6 +79,11 @@ class WebhookController extends Controller
                 ]);
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Find Deposit Job
+            |--------------------------------------------------------------------------
+            */
 
             $deposit = DepositJob::where('invoice_id', $payment['invoice_id'])
                 ->where('user_id', $userId)
@@ -76,6 +104,43 @@ class WebhookController extends Controller
                 ]);
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Save txHash Immediately
+            |--------------------------------------------------------------------------
+            */
+
+            if (empty($deposit->tx_hash)) {
+
+                $deposit->tx_hash = $txHash;
+                $deposit->save();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Verify Amount
+            |--------------------------------------------------------------------------
+            */
+
+            if ((float) $deposit->amount != (float) $payment['amount']) {
+                throw new \Exception('Amount mismatch.');
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Verify Wallet
+            |--------------------------------------------------------------------------
+            */
+
+            if (strtoupper($deposit->wallet) != strtoupper($payment['token_name'])) {
+                throw new \Exception('Wallet mismatch.');
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Prevent Duplicate Transaction
+            |--------------------------------------------------------------------------
+            */
 
             $exists = Transaction::where('txn_id', $txHash)
                 ->lockForUpdate()
@@ -95,19 +160,25 @@ class WebhookController extends Controller
                 ]);
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Complete Deposit
+            |--------------------------------------------------------------------------
+            */
 
             $deposit->update([
                 'status'           => 'Completed',
                 'paid_at'          => now(),
-                'tx_hash'          => $txHash,
                 'gateway_response' => $payment,
             ]);
 
             DB::commit();
 
             return response()->json([
-                'status'  => true,
-                'message' => 'Deposit credited successfully.',
+                'status'     => true,
+                'message'    => 'Deposit credited successfully.',
+                'invoice_id' => $deposit->invoice_id,
+                'tx_hash'    => $txHash,
             ]);
 
         } catch (\Throwable $e) {
