@@ -31,9 +31,9 @@ class BmindWalletController extends Controller
                 ], 422);
             }
 
-            $user = Auth::user();
+            $authUser = Auth::user();
 
-            if ($user->status == 0) {
+            if (!$authUser || $authUser->status == 0) {
                 return response()->json([
                     'status'  => false,
                     'message' => 'You are not eligible'
@@ -42,7 +42,7 @@ class BmindWalletController extends Controller
 
             DB::beginTransaction();
 
-            $user = User::where('id', auth()->id())
+            $user = User::where('id', $authUser->id)
                 ->lockForUpdate()
                 ->first();
 
@@ -58,6 +58,8 @@ class BmindWalletController extends Controller
             $setting = BmindStakingSetting::first();
 
             if (!$setting) {
+                DB::rollBack();
+
                 return response()->json([
                     'status'  => false,
                     'message' => 'Staking settings not found'
@@ -65,6 +67,8 @@ class BmindWalletController extends Controller
             }
 
             if ($request->amount < $setting->min_staking) {
+                DB::rollBack();
+
                 return response()->json([
                     'status'  => false,
                     'message' => 'Minimum staking is ' . $setting->min_staking
@@ -72,6 +76,8 @@ class BmindWalletController extends Controller
             }
 
             if ($request->amount > $setting->max_staking) {
+                DB::rollBack();
+
                 return response()->json([
                     'status'  => false,
                     'message' => 'Maximum staking is ' . $setting->max_staking
@@ -80,7 +86,14 @@ class BmindWalletController extends Controller
 
             $walletService = new WalletService();
 
-            if (!$walletService->hasBalance($user->id, 'BMIND', $request->amount)) {
+            if (!$walletService->hasBalance(
+                $user->id,
+                'BMIND',
+                $request->amount
+            )) {
+
+                DB::rollBack();
+
                 return response()->json([
                     'status'  => false,
                     'message' => 'Insufficient BMIND balance'
@@ -133,7 +146,6 @@ class BmindWalletController extends Controller
             $dailyProfit = (($request->amount * $profitPercent) / 100) / 365;
             $totalProfit = $dailyProfit * $request->duration;
 
-
             Transaction::create([
                 'user_id'     => $user->id,
                 'wallet'      => 'BMIND',
@@ -143,7 +155,6 @@ class BmindWalletController extends Controller
                 'status'      => 'Approved',
                 'description' => $request->amount . ' BMIND staking purchase',
             ]);
-
 
             $staking = PurchaseStaking::create([
                 'user_id'           => $user->id,
@@ -158,9 +169,6 @@ class BmindWalletController extends Controller
                 'status'            => 1,
             ]);
 
-
-
-            // Affiliate Level 1
 
             $level1 = $user->sponsor_id
                 ? User::find($user->sponsor_id)
@@ -182,8 +190,6 @@ class BmindWalletController extends Controller
                 ]);
             }
 
-            // Affiliate Level 2
-
             $level2 = ($level1 && $level1->sponsor_id)
                 ? User::find($level1->sponsor_id)
                 : null;
@@ -203,8 +209,6 @@ class BmindWalletController extends Controller
                     'description'   => 'Level 2 affiliate bonus from ' . $user->user_name,
                 ]);
             }
-
-            // Affiliate Level 3
 
             $level3 = ($level2 && $level2->sponsor_id)
                 ? User::find($level2->sponsor_id)
@@ -226,6 +230,8 @@ class BmindWalletController extends Controller
                 ]);
             }
 
+            DB::commit();
+
             return response()->json([
                 'status'  => true,
                 'message' => 'BMIND staking successful',
@@ -239,12 +245,14 @@ class BmindWalletController extends Controller
                 ]
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
 
             return response()->json([
                 'status'  => false,
                 'message' => 'Something went wrong',
-                'error'   => $e->getMessage()
+                // 'error'   => $e->getMessage()
             ], 500);
         }
     }

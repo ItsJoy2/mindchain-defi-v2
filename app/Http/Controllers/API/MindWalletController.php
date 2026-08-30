@@ -372,9 +372,11 @@ class MindWalletController extends Controller
             $amount = (float) $request->amount;
             $wallet = $request->wallet;
 
-            $receiver = User::where('user_name', $request->receiver_user_name)->first();
+            $receiver = User::where('user_name', $request->receiver_user_name)->lockForUpdate()->first();
 
             if (!$receiver) {
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Receiver not found'
@@ -384,6 +386,8 @@ class MindWalletController extends Controller
             $staking = MindStakingSetting::first();
 
             if (!$staking) {
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Staking settings not found'
@@ -401,9 +405,13 @@ class MindWalletController extends Controller
 
                 if ($balance < $amount) {
 
+                    DB::rollBack();
+
                     return response()->json([
                         'status' => false,
-                        'message' => 'Insufficient MIND balance'
+                        'message' => 'Insufficient MIND balance',
+                        'balance' => $balance,
+                        'required' => $amount
                     ], 400);
                 }
 
@@ -424,9 +432,13 @@ class MindWalletController extends Controller
 
                 if ($balance < $amount) {
 
+                    DB::rollBack();
+
                     return response()->json([
                         'status' => false,
-                        'message' => 'Insufficient Ambassador balance'
+                        'message' => 'Insufficient Ambassador balance',
+                        'balance' => $balance,
+                        'required' => $amount
                     ], 400);
                 }
 
@@ -607,7 +619,8 @@ class MindWalletController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                // 'message' => $e->getMessage()
+                'message' => 'Something went wrong'
             ], 500);
         }
     }

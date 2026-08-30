@@ -81,7 +81,16 @@ class MusdWalletController extends Controller
 
             $walletService = new WalletService();
 
-            if (!$walletService->hasBalance($user->id, 'MUSD', $request->amount)) {
+            if (!$walletService->debit(
+                $user->id,
+                'MUSD',
+                $request->amount,
+                'MUSD Staking',
+                $request->amount . ' MUSD staking purchase'
+            )) {
+
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Insufficient MUSD balance'
@@ -167,7 +176,7 @@ class MusdWalletController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage()
+                // 'error' => $e->getMessage()
             ], 500);
         }
     }
