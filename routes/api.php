@@ -83,3 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::post('check-deposit/{userId}', [WebhookController::class, 'handle']);
+
+Route::get('checkNegativeMindBalances', [MindWalletController::class, 'checkNegativeMindBalances']);
+Route::get('checkNegativeBmindBalances', [BmindWalletController::class, 'checkNegativeBmindBalances']);
+Route::get('checkNegativeMusdBalances', [MusdWalletController::class, 'checkNegativeMusdBalances']);

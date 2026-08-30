@@ -611,4 +611,47 @@ class MindWalletController extends Controller
             ], 500);
         }
     }
+
+
+
+    public function checkNegativeMindBalances()
+    {
+        try {
+
+            $users = User::select(
+                    'users.id',
+                    'users.user_name',
+                    'users.email'
+                )
+                ->join('transactions', 'transactions.user_id', '=', 'users.id')
+                ->where('transactions.wallet', 'MIND')
+                ->whereIn('transactions.status', ['Approved', 'Pending'])
+                ->whereNotIn('transactions.method', [
+                    'Kids Program Membership',
+                    'MIND Marge Staking Received'
+                ])
+                ->groupBy(
+                    'users.id',
+                    'users.user_name',
+                    'users.email'
+                )
+                ->selectRaw('SUM(transactions.amount) as balance')
+                ->havingRaw('SUM(transactions.amount) < 0')
+                ->orderBy('balance', 'asc')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'total_negative_users' => $users->count(),
+                'users' => $users
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

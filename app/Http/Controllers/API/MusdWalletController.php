@@ -40,7 +40,7 @@ class MusdWalletController extends Controller
                     'message' => 'You are not eligible'
                 ], 403);
             }
-            
+
             DB::beginTransaction();
 
             $user = User::where('id', auth()->id())
@@ -168,6 +168,43 @@ class MusdWalletController extends Controller
                 'status' => false,
                 'message' => 'Something went wrong',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function checkNegativeMusdBalances()
+    {
+        try {
+
+            $users = User::select(
+                    'users.id',
+                    'users.user_name',
+                    'users.email'
+                )
+                ->join('transactions', 'transactions.user_id', '=', 'users.id')
+                ->where('transactions.wallet', 'MUSD')
+                ->whereIn('transactions.status', ['Approved', 'Pending'])
+                ->groupBy(
+                    'users.id',
+                    'users.user_name',
+                    'users.email'
+                )
+                ->selectRaw('SUM(transactions.amount) as balance')
+                ->havingRaw('SUM(transactions.amount) < 0')
+                ->orderBy('balance', 'asc')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'total_negative_users' => $users->count(),
+                'users' => $users
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }
