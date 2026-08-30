@@ -48,6 +48,20 @@ class MindWalletController extends Controller
 
             DB::beginTransaction();
 
+
+            $user = User::where('id', $authUser->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$user || $user->status == 0) {
+                DB::rollBack();
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You are not eligible'
+                ], 403);
+            }
+
             $amount = (float) $request->amount;
             $wallet = $request->wallet;
 
@@ -121,17 +135,30 @@ class MindWalletController extends Controller
             // Check balance and create transaction
             if ($wallet == "mind") {
 
+                // $balance = Transaction::where('user_id', $user->id)
+                //     ->where('wallet', 'MIND')
+                //     ->whereIn('status', ['Approved', 'Pending'])
+                //     ->where('method', '!=', ['Kids Program Membership', 'MIND Marge Staking Received'])
+                //     ->sum('amount');
+
                 $balance = Transaction::where('user_id', $user->id)
                     ->where('wallet', 'MIND')
                     ->whereIn('status', ['Approved', 'Pending'])
-                    ->where('method', '!=', ['Kids Program Membership', 'MIND Marge Staking Received'])
+                    ->whereNotIn('method', [
+                        'Kids Program Membership',
+                        'MIND Marge Staking Received'
+                    ])
                     ->sum('amount');
 
                 if ($balance < $amount) {
 
+                    DB::rollBack();
+
                     return response()->json([
                         'status' => false,
-                        'message' => 'Insufficient MIND balance'
+                        'message' => 'Insufficient MIND balance',
+                        'balance' => $balance,
+                        'required' => $amount
                     ], 400);
                 }
 
@@ -152,9 +179,13 @@ class MindWalletController extends Controller
 
                 if ($balance < $amount) {
 
+                    DB::rollBack();
+
                     return response()->json([
                         'status' => false,
-                        'message' => 'Insufficient Ambassador balance'
+                        'message' => 'Insufficient Ambassador balance',
+                        'balance' => $balance,
+                        'required' => $amount
                     ], 400);
                 }
 
@@ -325,6 +356,20 @@ class MindWalletController extends Controller
             }
 
             DB::beginTransaction();
+
+            $user = User::where('id', $authUser->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$user || $user->status == 0) {
+                DB::rollBack();
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You are not eligible'
+                ], 403);
+            }
+
 
             $amount = (float) $request->amount;
             $wallet = $request->wallet;

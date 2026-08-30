@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -31,9 +32,24 @@ class BmindWalletController extends Controller
                 ], 422);
             }
 
-            $user = Auth::user();
+            $authUser = Auth::user();
 
-            if ($user->status == 0) {
+            if (!$authUser || $authUser->status == 0) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'You are not eligible'
+                ], 403);
+            }
+
+            DB::beginTransaction();
+
+            $user = User::where('id', $authUser->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$user || $user->status == 0) {
+                DB::rollBack();
+
                 return response()->json([
                     'status'  => false,
                     'message' => 'You are not eligible'

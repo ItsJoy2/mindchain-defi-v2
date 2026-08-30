@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -31,9 +32,24 @@ class MusdWalletController extends Controller
                 ], 422);
             }
 
-            $user = Auth::user();
+            $authUser = Auth::user();
 
-            if ($user->status == 0) {
+            if (!$authUser || $authUser->status == 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You are not eligible'
+                ], 403);
+            }
+
+            DB::beginTransaction();
+
+            $user = User::where('id', $authUser->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$user || $user->status == 0) {
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'You are not eligible'
@@ -43,6 +59,8 @@ class MusdWalletController extends Controller
             $setting = MusdStakingSetting::first();
 
             if (!$setting) {
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Staking settings not found'
@@ -50,6 +68,8 @@ class MusdWalletController extends Controller
             }
 
             if ($request->amount < $setting->min_staking) {
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Minimum staking is ' . $setting->min_staking
@@ -57,6 +77,8 @@ class MusdWalletController extends Controller
             }
 
             if ($request->amount > $setting->max_staking) {
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Maximum staking is ' . $setting->max_staking
@@ -66,6 +88,9 @@ class MusdWalletController extends Controller
             $walletService = new WalletService();
 
             if (!$walletService->hasBalance($user->id, 'MUSD', $request->amount)) {
+
+                DB::rollBack();
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Insufficient MUSD balance'
@@ -134,6 +159,8 @@ class MusdWalletController extends Controller
                 }
             }
 
+            DB::commit();
+
             return response()->json([
                 'status' => true,
                 'message' => 'MUSD staking successful',
@@ -147,6 +174,8 @@ class MusdWalletController extends Controller
             ]);
 
         } catch (\Exception $e) {
+
+            DB::rollBack();
 
             return response()->json([
                 'status' => false,
