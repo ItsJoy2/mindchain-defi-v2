@@ -48,8 +48,7 @@ class MindWalletController extends Controller
 
             DB::beginTransaction();
 
-
-            $user = User::where('id', $authUser->id)
+            $user = User::where('id', auth()->id())
                 ->lockForUpdate()
                 ->first();
 
@@ -357,7 +356,7 @@ class MindWalletController extends Controller
 
             DB::beginTransaction();
 
-            $user = User::where('id', $authUser->id)
+            $user = User::where('id', auth()->id())
                 ->lockForUpdate()
                 ->first();
 
@@ -369,7 +368,6 @@ class MindWalletController extends Controller
                     'message' => 'You are not eligible'
                 ], 403);
             }
-
 
             $amount = (float) $request->amount;
             $wallet = $request->wallet;

@@ -32,18 +32,18 @@ class MusdWalletController extends Controller
                 ], 422);
             }
 
-            $authUser = Auth::user();
+            $user = Auth::user();
 
-            if (!$authUser || $authUser->status == 0) {
+            if ($user->status == 0) {
                 return response()->json([
                     'status' => false,
                     'message' => 'You are not eligible'
                 ], 403);
             }
-
+            
             DB::beginTransaction();
 
-            $user = User::where('id', $authUser->id)
+            $user = User::where('id', auth()->id())
                 ->lockForUpdate()
                 ->first();
 
@@ -59,8 +59,6 @@ class MusdWalletController extends Controller
             $setting = MusdStakingSetting::first();
 
             if (!$setting) {
-                DB::rollBack();
-
                 return response()->json([
                     'status' => false,
                     'message' => 'Staking settings not found'
@@ -68,8 +66,6 @@ class MusdWalletController extends Controller
             }
 
             if ($request->amount < $setting->min_staking) {
-                DB::rollBack();
-
                 return response()->json([
                     'status' => false,
                     'message' => 'Minimum staking is ' . $setting->min_staking
@@ -77,8 +73,6 @@ class MusdWalletController extends Controller
             }
 
             if ($request->amount > $setting->max_staking) {
-                DB::rollBack();
-
                 return response()->json([
                     'status' => false,
                     'message' => 'Maximum staking is ' . $setting->max_staking
@@ -88,9 +82,6 @@ class MusdWalletController extends Controller
             $walletService = new WalletService();
 
             if (!$walletService->hasBalance($user->id, 'MUSD', $request->amount)) {
-
-                DB::rollBack();
-
                 return response()->json([
                     'status' => false,
                     'message' => 'Insufficient MUSD balance'
@@ -159,8 +150,6 @@ class MusdWalletController extends Controller
                 }
             }
 
-            DB::commit();
-
             return response()->json([
                 'status' => true,
                 'message' => 'MUSD staking successful',
@@ -174,8 +163,6 @@ class MusdWalletController extends Controller
             ]);
 
         } catch (\Exception $e) {
-
-            DB::rollBack();
 
             return response()->json([
                 'status' => false,
