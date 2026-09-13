@@ -37,16 +37,16 @@ class DailyEliteBonus extends Command
                 $days = $createdAt->diffInDays($today);
 
                 // Already received today check
-                // $alreadyReceivedToday = Transaction::where('user_id', $staking->user_id)
-                //     ->where('method', 'Daily Elite Bonus')
-                //     ->whereDate('created_at', Carbon::today())
-                //     ->exists();
+                $alreadyReceivedToday = Transaction::where('user_id', $staking->user_id)
+                    ->where('method', 'Daily Elite Bonus')
+                    ->whereDate('created_at', Carbon::today())
+                    ->exists();
 
-                // if ($alreadyReceivedToday) {
+                if ($alreadyReceivedToday) {
 
-                //     DB::commit();
-                //     continue;
-                // }
+                    DB::commit();
+                    continue;
+                }
 
                 // duration cross → switch to 15% APY
                 if ($days > $staking->duration) {
