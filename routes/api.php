@@ -12,6 +12,7 @@ use App\Http\Controllers\API\MusdWalletController;
 use App\Http\Controllers\API\StakingHistoryController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\TransferController;
+use App\Http\Controllers\API\UsdtWalletController;
 use App\Http\Controllers\API\WebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -76,6 +77,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('transactions', [TransactionController::class, 'index']);
+
+    Route::post('liquidity/invest',[UsdtWalletController::class, 'store']);
+    Route::get('liquidity/history',[UsdtWalletController::class, 'liquidityHistory']);
 
 
     Route::post('deposit/create', [DepositController::class, 'createDeposit']);

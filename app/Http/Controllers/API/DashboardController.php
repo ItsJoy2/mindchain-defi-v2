@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AmbassadorHistory;
 use App\Models\AngelStaking;
 use App\Models\EliteStaking;
+use App\Models\LiquidityPool;
 use App\Models\MkidsPurchaseHistory;
 use App\Models\PurchaseStaking;
 use App\Models\Transaction;
@@ -79,6 +80,8 @@ class DashboardController extends Controller
                 ->whereIn('status', ['Approved', 'Pending'])
                 ->sum('amount');
 
+            $liquidity_pool = LiquidityPool::where('user_id', $userId)->where('status', 'Active')->sum('invested_amount');
+
             $wallets = [
 
                 'mind_wallet' => [
@@ -139,6 +142,10 @@ class DashboardController extends Controller
                 'mind_kids' => [
                     'balance' => number_format(MkidsPurchaseHistory::where('user_id', $userId)->sum('amount'), 2),
                     'value'   => number_format(MkidsPurchaseHistory::where('user_id', $userId)->sum('amount') * $mind_price, 2),
+                ],
+                'liquidity_pool_wallet' => [
+                    'balance' => number_format($liquidity_pool, 2),
+                    'value'   => number_format($liquidity_pool * $usdt_price, 2),
                 ],
 
             ];
