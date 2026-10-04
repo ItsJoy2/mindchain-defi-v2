@@ -290,7 +290,7 @@ class StakingHistoryController extends Controller
                         2,
                         '.',
                         ''
-                    ) . '%',
+                    ),
 
                     'lock_days' => (int) $liquiditySetting->lock_days,
                 ],
