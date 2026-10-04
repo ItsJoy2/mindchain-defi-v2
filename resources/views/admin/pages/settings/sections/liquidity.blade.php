@@ -73,13 +73,14 @@
 
                         <input
                             type="number"
-                            step="0.00000001"
+                            step="0.01"
                             min="0"
                             class="form-control"
                             name="min_amount"
                             value="{{ old(
                                 'min_amount',
-                                number_format($settings['liquidity']->min_amount ?? 50, 2, '.', '') }}"
+                                number_format($settings['liquidity']->min_amount ?? 50, 2, '.', '')
+                            ) }}"
                             required>
 
                     </div>
