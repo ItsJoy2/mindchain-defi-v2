@@ -31,5 +31,8 @@ Schedule::command('musd:staking-daily')->dailyAt('00:25');
 // ANGEL BONUS
 Schedule::command('angel:daily-bonus')->dailyAt('00:30');
 
+// LIQUIDITY POOL RELEASE
+Schedule::command('liquidity:release')->dailyAt('00:35');
+
 //check pending deposits
 // Schedule::command('deposit:check')->everyMinute()->withoutOverlapping();
