@@ -98,7 +98,7 @@ class LiquidityPoolService
                 $userId,
                 $wallet,
                 $amount,
-                'Liquidity Pool Investment',
+                'Liquidity Pool',
                 "Liquidity Pool investment of {$amount} {$wallet}",
                 'Approved'
             );

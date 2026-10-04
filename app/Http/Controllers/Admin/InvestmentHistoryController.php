@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AngelStaking;
 use App\Models\EliteStaking;
+use App\Models\LiquidityPool;
 use App\Models\MkidsStakingProgram;
 use App\Models\PurchaseStaking;
 use Illuminate\Http\Request;
@@ -105,5 +106,35 @@ class InvestmentHistoryController extends Controller
             ->appends($request->query());
 
         return view('admin.pages.investment-history.mkids-staking', compact('investments'));
+    }
+
+    public function liquidityPool(Request $request)
+    {
+        $query = LiquidityPool::with('user')
+            ->latest('id');
+
+        // Search Username / Email
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('user_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Wallet filter
+        if ($request->filled('wallet')) {
+            $query->where('wallet', $request->wallet);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $investments = $query->paginate(20);
+
+        return view('admin.pages.investment-history.liquidity-pool', compact('investments'));
     }
 }

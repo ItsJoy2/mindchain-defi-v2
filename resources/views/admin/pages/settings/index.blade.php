@@ -78,6 +78,14 @@
                     </button>
                 </li>
 
+                <li class="nav-item me-2">
+                    <button class="nav-link" data-coreui-toggle="tab" data-coreui-target="#liquidity" type="button">
+
+                        Liquidity Pool
+
+                    </button>
+                </li>
+
             </ul>
 
             {{-- Tab Content --}}
@@ -109,6 +117,12 @@
 
                 <div class="tab-pane fade" id="mkids">
                     @include('admin.pages.settings.sections.mkids')
+                </div>
+
+                <div class="tab-pane fade" id="liquidity">
+
+                    @include('admin.pages.settings.sections.liquidity')
+
                 </div>
 
             </div>

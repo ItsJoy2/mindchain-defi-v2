@@ -48,6 +48,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
         Route::get('wallet-icons', [SettingController::class, 'walletIcons'])->name('wallet-icons');
         Route::post('wallet-icons', [SettingController::class, 'updateWalletIcons'])->name('wallet-icons.update');
+
+        Route::post('liquidity',[SettingController::class, 'updateLiquidity'])->name('liquidity');
     });
 
     //investment History
@@ -56,6 +58,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('elite-staking', [InvestmentHistoryController::class, 'eliteStaking'])->name('elite-staking');
         Route::get('angel-staking', [InvestmentHistoryController::class, 'angelStaking'])->name('angel-staking');
         Route::get('/mkids-staking', [InvestmentHistoryController::class, 'mkidsStaking'])->name('mkids-staking');
+        Route::get('liquidity-pool', [InvestmentHistoryController::class, 'liquidityPool'])->name('liquidity-pool');
     });
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [AuthController::class, 'profile'])->name('index');

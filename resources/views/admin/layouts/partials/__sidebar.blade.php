@@ -77,6 +77,16 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.history.liquidity-pool') ? 'active' : '' }}"
+                    href="{{ route('admin.history.liquidity-pool') }}">
+
+                        <span class="nav-icon"></span>
+
+                        Liquidity Pool
+                    </a>
+                </li>
+
             </ul>
 
         </li>

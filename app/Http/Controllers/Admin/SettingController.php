@@ -7,6 +7,7 @@ use App\Models\AngelSetting;
 use App\Models\BmindStakingSetting;
 use App\Models\EliteSetting;
 use App\Models\EliteV2Setting;
+use App\Models\LiquiditySetting;
 use App\Models\MindStakingSetting;
 use App\Models\MkidsStakingSetting;
 use App\Models\MusdStakingSetting;
@@ -25,6 +26,7 @@ class SettingController extends Controller
             'bmind'  => BmindStakingSetting::first(),
             'musd'   => MusdStakingSetting::first(),
             'mkids'  => MkidsStakingSetting::first(),
+            'liquidity'  => LiquiditySetting::first(),
         ];
 
         return view('admin.pages.settings.index', compact('settings'));
@@ -114,5 +116,32 @@ class SettingController extends Controller
         }
 
         return back()->with('success','Wallet icons updated successfully.');
+    }
+    public function updateLiquidity(Request $request)
+    {
+        $request->validate([
+            'min_amount' => ['required','numeric','gt:0'],
+            'reward_percentage' => ['required','numeric','gte:0'],
+            'lock_days' => ['required','integer','min:1'],
+            'status' => ['required','boolean'],
+        ]);
+
+        $setting = LiquiditySetting::first();
+
+        if (!$setting) {
+            $setting = new LiquiditySetting();
+        }
+
+        $setting->min_amount = $request->min_amount;
+        $setting->reward_percentage = $request->reward_percentage;
+        $setting->lock_days = $request->lock_days;
+        $setting->status = $request->status;
+
+        $setting->save();
+
+        return back()->with(
+            'success',
+            'Liquidity Pool settings updated successfully.'
+        );
     }
 }
