@@ -83,7 +83,7 @@ class UsdtWalletController extends Controller
                     auth()->id()
                 )
                 ->latest('id')
-                ->paginate(20);
+                ->paginate(5);
 
             return response()->json([
                 'status' => true,
