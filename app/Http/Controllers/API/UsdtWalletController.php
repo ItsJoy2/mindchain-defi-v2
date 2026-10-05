@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\LiquidityPool;
 use App\Services\LiquidityPoolService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -78,7 +79,7 @@ class UsdtWalletController extends Controller
     {
         try {
 
-            $pools = \App\Models\LiquidityPool::where(
+            $pools = LiquidityPool::where(
                     'user_id',
                     auth()->id()
                 )

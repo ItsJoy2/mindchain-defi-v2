@@ -56,6 +56,7 @@ class DashboardController extends Controller
                 'ELITEV2'    => $walletIcons['ELITEV2'] ?? null,
                 'ANGEL'      => $walletIcons['ANGEL'] ?? null,
                 'MERCHANT'   => $walletIcons['MERCHANT'] ?? null,
+                'MIND/USDT'   => $walletIcons['MIND/USDT'] ?? null,
             ];
 
             // Wallet Amounts
