@@ -126,6 +126,34 @@
             </ul>
 
         </li>
+
+        @php
+            $newTicketCount = \App\Models\Ticket::where('status', 'open')->count();
+        @endphp
+
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('admin.support.ticket.*') ? 'active' : '' }}"
+            href="{{ route('admin.support.ticket.index') }}">
+
+                <svg class="nav-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 576 512">
+
+                    <path fill="var(--ci-primary-color, currentcolor)"
+                        d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64H176v80c0 6.7 4.2 12.7 10.7 15.2s13.8.9 18.8-4.1L288 416H512c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64zM128 128H448c8.8 0 16 7.2 16 16s-7.2 16-16 16H128c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 80H448c8.8 0 16 7.2 16 16s-7.2 16-16 16H128c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 80H352c8.8 0 16 7.2 16 16s-7.2 16-16 16H128c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
+
+                </svg>
+
+                Support Tickets
+
+                @if($newTicketCount > 0)
+                    <span class="badge bg-danger ms-auto">
+                        {{ $newTicketCount }}
+                    </span>
+                @endif
+
+            </a>
+        </li>
         <li class="nav-group {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}">
 
             <a class="nav-link nav-group-toggle" href="#">

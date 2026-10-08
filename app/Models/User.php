@@ -87,6 +87,7 @@ class User extends Authenticatable
     }
     public function eliteStakingHistories()
     {
-        return $this->hasMany(EliteV2StakingHistory::class);
+        return $this->hasMany(EliteStaking::class);
     }
+
 }

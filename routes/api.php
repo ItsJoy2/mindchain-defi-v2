@@ -10,6 +10,7 @@ use App\Http\Controllers\API\MindWalletController;
 use App\Http\Controllers\API\MkidsProgramController;
 use App\Http\Controllers\API\MusdWalletController;
 use App\Http\Controllers\API\StakingHistoryController;
+use App\Http\Controllers\API\SupportTicketController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\TransferController;
 use App\Http\Controllers\API\UsdtWalletController;
@@ -84,6 +85,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('deposit/create', [DepositController::class, 'createDeposit']);
     Route::get('deposit/{txHash}', [DepositController::class, 'statusShow']);
+
+    // Tickets
+    Route::get('tickets', [SupportTicketController::class,'index']);
+    Route::post('tickets', [SupportTicketController::class,'store']);
+    Route::get('tickets/{ticket}', [SupportTicketController::class,'show']);
+    Route::post('tickets/{ticket}/messages', [SupportTicketController::class,'sendMessage']);
+    Route::post('tickets/{ticket}/close', [SupportTicketController::class,'close']);
 });
 
 Route::post('check-deposit/{userId}', [WebhookController::class, 'handle']);

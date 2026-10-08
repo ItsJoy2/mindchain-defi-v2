@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvestmentHistoryController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\TransactionsController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -65,4 +66,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::put('/', [AuthController::class, 'profileUpdate'])->name('update');
         Route::put('password', [AuthController::class, 'changePassword'])->name('password');
     });
+
+    Route::prefix('support/tickets')->name('support.ticket.')->group(function () {
+        Route::get('/', [SupportTicketController::class, 'index'])->name('index');
+        Route::get('/{ticket}', [SupportTicketController::class, 'show'])->name('show');
+        Route::post('/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('reply');
+        Route::post('/{ticket}/status', [SupportTicketController::class, 'updateStatus'])->name('status');
+    });
+
 });
