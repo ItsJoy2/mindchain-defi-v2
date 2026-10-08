@@ -117,7 +117,7 @@
 
                                     </div>
 
-                                    <small class="text-muted float-end mt-1">
+                                    <small class="text-muted local-time float-end mt-1" data-time="{{ $message->created_at->toIso8601String() }}">
 
                                         {{ $message->created_at->format('d M Y h:i A') }}
 
@@ -187,7 +187,7 @@
 
                                     </div>
 
-                                    <small class="text-muted">
+                                    <small class="text-muted local-time" data-time="{{ $message->created_at->toIso8601String() }}">
 
                                         {{ $message->created_at->format('d M Y h:i A') }}
 

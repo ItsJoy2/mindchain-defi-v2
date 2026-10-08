@@ -152,7 +152,7 @@
                         </td>
 
                         {{-- Last Message --}}
-                        <td>
+                        <td class="local-time" data-time="{{ optional($ticket->last_message_at)->toIso8601String() }}">
                             {{ optional($ticket->last_message_at)->format('d M Y h:i A') }}
                         </td>
 
