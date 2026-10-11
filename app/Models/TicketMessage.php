@@ -12,14 +12,6 @@ class TicketMessage extends Model
         'user_id',
         'sender_type',
         'message',
-        'attachment',
-        'attachment_name',
-        'attachment_type',
-        'attachment_size',
-    ];
-
-    protected $appends = [
-        'attachment_url',
     ];
 
     /**
@@ -48,5 +40,10 @@ class TicketMessage extends Model
         }
 
         return asset('storage/' . $this->attachment);
+    }
+
+    public function attachments()
+    {
+        return $this->hasMany(TicketMessageAttachment::class);
     }
 }

@@ -1,3 +1,4 @@
+
 @extends('admin.layouts.app')
 
 @section('title', 'Support Chat')
@@ -56,7 +57,7 @@
                 </div>
 
                 {{-- Messages --}}
-                <div class="card-body"id="chatMessages"style="height: 500px;overflow-y: auto;">
+                <div class="card-body" id="chatMessages" style="height: 500px; overflow-y: auto;">
 
                     @foreach($ticket->messages as $message)
 
@@ -76,48 +77,44 @@
                                             </div>
                                         @endif
 
-                                        @if($message->attachment)
-
-                                            <div class="mt-2">
-
-                                                @if(
-                                                    str_starts_with(
-                                                        $message->attachment_type ?? '',
-                                                        'image/'
-                                                    )
-                                                )
-
-                                                    <a href="{{ $message->attachment_url }}"
-                                                       target="_blank">
-
-                                                        <img
-                                                            src="{{ $message->attachment_url }}"
-                                                            class="img-fluid rounded"
-                                                            style="max-width:250px;"
-                                                        >
-
-                                                    </a>
-
-                                                @else
-
+                                        {{-- Admin message attachments --}}
+                                    @if($message->attachments->isNotEmpty())
+                                        <div class="mt-2">
+                                            @foreach($message->attachments as $attachment)
+                                                @if($attachment->is_image)
                                                     <a
-                                                        href="{{ $message->attachment_url }}"
+                                                        href="{{ $attachment->file_url }}"
                                                         target="_blank"
-                                                        class="text-white"
+                                                        rel="noopener noreferrer"
                                                     >
-                                                        📎
-                                                        {{ $message->attachment_name }}
+                                                        <img
+                                                            src="{{ $attachment->file_url }}"
+                                                            alt="{{ $attachment->file_name }}"
+                                                            class="img-fluid rounded mb-2"
+                                                            style="max-width:250px; max-height:250px; width:auto; height:auto; display:block;"
+                                                            loading="lazy"
+                                                            onerror="this.insertAdjacentHTML('afterend', '<small class=\'text-danger\'>Image failed to load</small>'); this.style.display='none';"
+                                                        >
                                                     </a>
-
+                                                @else
+                                                    <div class="mt-2">
+                                                        <a
+                                                            href="{{ $attachment->file_url }}"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            📎 {{ $attachment->file_name }}
+                                                        </a>
+                                                    </div>
                                                 @endif
-
-                                            </div>
-
-                                        @endif
+                                            @endforeach
+                                        </div>
+                                    @endif
 
                                     </div>
 
-                                    <small class="text-muted local-time float-end mt-1" data-time="{{ $message->created_at->toIso8601String() }}">
+                                    <small class="text-muted local-time float-end mt-1"
+                                           data-time="{{ $message->created_at->toIso8601String() }}">
 
                                         {{ $message->created_at->format('d M Y h:i A') }}
 
@@ -135,7 +132,7 @@
 
                                 <div style="max-width:70%;">
 
-                                    <div class=" border rounded p-3">
+                                    <div class="border rounded p-3">
 
                                         @if($message->message)
 
@@ -145,41 +142,55 @@
 
                                         @endif
 
-                                        @if($message->attachment)
+                                        {{-- User message attachments --}}
+                                        @if($message->attachments->isNotEmpty())
 
                                             <div class="mt-2">
 
-                                                @if(
-                                                    str_starts_with(
-                                                        $message->attachment_type ?? '',
-                                                        'image/'
-                                                    )
-                                                )
+                                                @foreach($message->attachments as $attachment)
 
-                                                    <a
-                                                        href="{{ $message->attachment_url }}"
-                                                        target="_blank"
-                                                    >
+                                                    @php
+                                                        $attachmentUrl = \Illuminate\Support\Facades\Storage::disk('public')
+                                                            ->url($attachment->file_path);
 
-                                                        <img
-                                                            src="{{ $message->attachment_url }}"
-                                                            class="img-fluid rounded"
-                                                            style="max-width:250px;"
+                                                        $isImage = str_starts_with(
+                                                            $attachment->mime_type ?? '',
+                                                            'image/'
+                                                        );
+                                                    @endphp
+
+                                                    @if($isImage)
+
+                                                        <a
+                                                            href="{{ $attachmentUrl }}"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
                                                         >
 
-                                                    </a>
+                                                            <img
+                                                                src="{{ $attachmentUrl }}"
+                                                                alt="{{ $attachment->file_name }}"
+                                                                class="img-fluid rounded mb-2"
+                                                                style="max-width:250px; display:block;"
+                                                            >
 
-                                                @else
+                                                        </a>
 
-                                                    <a
-                                                        href="{{ $message->attachment_url }}"
-                                                        target="_blank"
-                                                    >
-                                                        📎
-                                                        {{ $message->attachment_name }}
-                                                    </a>
+                                                    @else
 
-                                                @endif
+                                                        <div class="mt-2">
+                                                            <a
+                                                                href="{{ $attachmentUrl }}"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                📎 {{ $attachment->file_name }}
+                                                            </a>
+                                                        </div>
+
+                                                    @endif
+
+                                                @endforeach
 
                                             </div>
 
@@ -187,7 +198,8 @@
 
                                     </div>
 
-                                    <small class="text-muted local-time" data-time="{{ $message->created_at->toIso8601String() }}">
+                                    <small class="text-muted local-time"
+                                           data-time="{{ $message->created_at->toIso8601String() }}">
 
                                         {{ $message->created_at->format('d M Y h:i A') }}
 
@@ -210,10 +222,7 @@
 
                         <form
                             method="POST"
-                            action="{{ route(
-                                'admin.support.ticket.reply',
-                                $ticket->id
-                            ) }}"
+                            action="{{ route('admin.support.ticket.reply', $ticket->id) }}"
                             enctype="multipart/form-data"
                         >
 
@@ -222,7 +231,7 @@
                             <textarea
                                 name="message"
                                 class="form-control mb-2"
-                                rows="3"
+                                rows="2"
                                 placeholder="Write your reply..."
                             ></textarea>
 
@@ -233,15 +242,7 @@
                                     name="attachments[]"
                                     class="form-control"
                                     multiple
-                                    accept="
-                                        image/*,
-                                        .pdf,
-                                        .doc,
-                                        .docx,
-                                        .xls,
-                                        .xlsx,
-                                        .txt
-                                    "
+                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
                                 >
 
                                 <button
@@ -276,41 +277,30 @@
 
                     <form
                         method="POST"
-                        action="{{ route(
-                            'admin.support.ticket.status',
-                            $ticket->id
-                        ) }}"
+                        action="{{ route('admin.support.ticket.status', $ticket->id) }}"
                     >
 
                         @csrf
 
-                        <select
-                            name="status"
-                            class="form-control mb-3"
-                        >
+                        <select name="status" class="form-control mb-3">
 
-                            <option value="open"
-                                @selected($ticket->status === 'open')>
+                            <option value="open" @selected($ticket->status === 'open')>
                                 Open
                             </option>
 
-                            <option value="in_progress"
-                                @selected($ticket->status === 'in_progress')>
+                            <option value="in_progress" @selected($ticket->status === 'in_progress')>
                                 In Progress
                             </option>
 
-                            <option value="pending"
-                                @selected($ticket->status === 'pending')>
+                            <option value="pending" @selected($ticket->status === 'pending')>
                                 Pending
                             </option>
 
-                            <option value="resolved"
-                                @selected($ticket->status === 'resolved')>
+                            <option value="resolved" @selected($ticket->status === 'resolved')>
                                 Resolved
                             </option>
 
-                            <option value="closed"
-                                @selected($ticket->status === 'closed')>
+                            <option value="closed" @selected($ticket->status === 'closed')>
                                 Closed
                             </option>
 
@@ -356,7 +346,6 @@
 
 @endsection
 
-@push('scripts')
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -367,7 +356,24 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
+        document.querySelectorAll('.local-time').forEach(function (element) {
+            const value = element.dataset.time;
+
+            if (!value) return;
+
+            const date = new Date(value);
+
+            if (!Number.isNaN(date.getTime())) {
+                element.textContent = date.toLocaleString([], {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+        });
+
     });
 </script>
-
-@endpush
