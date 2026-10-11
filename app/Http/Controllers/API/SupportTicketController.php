@@ -181,25 +181,32 @@ class SupportTicketController extends Controller
 
             $ticketData = $ticket->toArray();
 
-            // Format messages and attachment URLs
             $ticketData['messages'] = $ticket->messages
                 ->map(function ($message) {
                     $messageData = $message->toArray();
 
+                    // Same message-এর সব attachment URL array
                     $messageData['attachments'] = $message->attachments
                         ->map(function ($attachment) {
                             $path = ltrim($attachment->file_path, '/');
 
-                            return [
-                                'id'        => $attachment->id,
-                                'file_url' => asset('storage/' . $path),
-                            ];
+                            $path = preg_replace(
+                                '#^storage/app/public/#',
+                                '',
+                                $path
+                            );
+
+                            $path = preg_replace('#^storage/#', '', $path);
+
+                            return asset('storage/' . $path);
                         })
-                        ->values();
+                        ->values()
+                        ->toArray();
 
                     return $messageData;
                 })
-                ->values();
+                ->values()
+                ->toArray();
 
             return response()->json([
                 'status'  => true,
