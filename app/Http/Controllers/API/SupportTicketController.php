@@ -192,17 +192,7 @@ class SupportTicketController extends Controller
 
                             return [
                                 'id'        => $attachment->id,
-                                'file_path' => $path,
-                                'file_name' => $attachment->file_name,
-                                'mime_type' => $attachment->mime_type,
-                                'file_size' => $attachment->file_size,
-
-                                // Public image/file URL
                                 'file_url' => asset('storage/' . $path),
-
-                                // Useful for debugging
-                                'file_exists' => Storage::disk('public')
-                                    ->exists($path),
                             ];
                         })
                         ->values();
